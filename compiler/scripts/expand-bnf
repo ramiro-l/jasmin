@@ -25,6 +25,7 @@ s/\<GT\>/'>[su]?'/g
 s/\<HAT\>/'^'/g
 s/\<IF\>/'if'/g
 s/\<INLINE\>/'inline'/g
+s/\<EXTERN\>/'extern'/g
 s/\<LBRACE\>/'{'/g
 s/\<LBRACKET\>/'['/g
 s/\<LE\>/'<=[su]?'/g

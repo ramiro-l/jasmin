@@ -2500,46 +2500,107 @@ let tt_fundef (arch_info : 'asm P.arch_info) (env0 : 'asm Env.env) loc (pf : S.p
   let env = Env.Vars.clear_locals env0 in
   if is_combine_flags pf.pdf_name then
     rs_tyerror ~loc:(L.loc pf.pdf_name) (string_error "invalid function name");
-  let inret = Option.map_default (List.map L.unloc) [] (L.unloc pf.pdf_body.pdb_ret) in
-  let dfl_mut x = List.mem x inret in
 
-  let envb, args =
-    let env, args = List.map_fold (tt_annot_paramdecls dfl_mut arch_info.pd) env pf.pdf_args in
-    let env = add_known_implicits arch_info env pf.pdf_body.pdb_instr in
-    env, List.flatten args in
-  let fs_tout = Option.map_default (List.map (tt_type arch_info.pd env |- snd |- snd)) [] pf.pdf_rty in
-  let ret_annot = Option.map_default (List.map fst) [] pf.pdf_rty in
-  let ret_annot = List.map pannot_to_annotations ret_annot in
-  let body, ret_loc, xret = tt_funbody arch_info envb pf.pdf_body in
-  let f_args = List.map (fun x -> L.mk_loc (L.loc x) (fst (L.unloc x))) args in
-  let fs_tin = List.map (fun x -> snd (L.unloc x)) args in
-  let f_ret = List.map (fun x -> L.mk_loc (L.loc x) (fst (L.unloc x))) xret in
-  let f_cc = tt_call_conv loc f_args f_ret pf.pdf_cc in
-  let annot, f_contract = tt_contract arch_info env0 f_ret dfl_mut pf in
-  let name = L.unloc pf.pdf_name in
-  let fdef =
-    { P.f_loc   = loc;
-      P.f_annot = process_f_annot loc name f_cc annot;
-      P.f_contract;
-      P.f_cc    = f_cc;
-      P.f_info  = ();
-      P.f_name  = P.F.mk name;
-      P.f_tyin  = List.map P.gty_of_gety fs_tin;
-      P.f_args  = List.map L.unloc f_args;
-      P.f_body  = body;
-      P.f_tyout = List.map P.gty_of_gety fs_tout;
-      P.f_ret_info = { ret_annot; ret_loc };
-      P.f_ret   = f_ret; } in
+  match pf.pdf_body with
+  | Some body ->
+      let inret = Option.map_default (List.map L.unloc) [] (L.unloc body.pdb_ret) in
+      let dfl_mut x = List.mem x inret in
 
-  check_return_statement ~loc fdef.P.f_name fs_tout
-    (List.map (fun x -> L.loc x, snd (L.unloc x)) xret);
+      let envb, args =
+        let env, args = List.map_fold (tt_annot_paramdecls dfl_mut arch_info.pd) env pf.pdf_args in
+        let env = add_known_implicits arch_info env body.pdb_instr in
+        env, List.flatten args in
+      let fs_tout = Option.map_default (List.map (tt_type arch_info.pd env |- snd |- snd)) [] pf.pdf_rty in
+      let ret_annot = Option.map_default (List.map fst) [] pf.pdf_rty in
+      let ret_annot = List.map pannot_to_annotations ret_annot in
+      let body, ret_loc, xret = tt_funbody arch_info envb body in
+      let f_args = List.map (fun x -> L.mk_loc (L.loc x) (fst (L.unloc x))) args in
+      let fs_tin = List.map (fun x -> snd (L.unloc x)) args in
+      let f_ret = List.map (fun x -> L.mk_loc (L.loc x) (fst (L.unloc x))) xret in
+      let f_cc = tt_call_conv loc f_args f_ret pf.pdf_cc in
+      let annot, f_contract = tt_contract arch_info env0 f_ret dfl_mut pf in
+      let name = L.unloc pf.pdf_name in
+      let fdef =
+        { P.f_loc   = loc;
+          P.f_annot = process_f_annot loc name f_cc annot;
+          P.f_contract;
+          P.f_cc    = f_cc;
+          P.f_info  = ();
+          P.f_name  = P.F.mk name;
+          P.f_tyin  = List.map P.gty_of_gety fs_tin;
+          P.f_args  = List.map L.unloc f_args;
+          P.f_body  = body;
+          P.f_tyout = List.map P.gty_of_gety fs_tout;
+          P.f_ret_info = { ret_annot; ret_loc };
+          P.f_ret   = f_ret; } in
 
-  warn_unused_variables envb fdef;
+      check_return_statement ~loc fdef.P.f_name fs_tout
+        (List.map (fun x -> L.loc x, snd (L.unloc x)) xret);
 
-  let return_storage = Option.map_default (List.map (fst |- snd)) [] pf.pdf_rty in
-  check_return_storage ~loc fdef.P.f_name return_storage f_ret;
+      warn_unused_variables envb fdef;
 
-  Env.Funs.push env0 fdef {fs_tin; fs_tout}
+      let return_storage = Option.map_default (List.map (fst |- snd)) [] pf.pdf_rty in
+      check_return_storage ~loc fdef.P.f_name return_storage f_ret;
+
+      Env.Funs.push env0 fdef {fs_tin; fs_tout}
+
+  | None ->
+      let dfl_mut _ = false in
+      let envb, args =
+        let env, args = List.map_fold (tt_annot_paramdecls dfl_mut arch_info.pd) env pf.pdf_args in
+        env, List.flatten args in
+      let fs_tout = Option.map_default (List.map (tt_type arch_info.pd env |- snd |- snd)) [] pf.pdf_rty in
+      let ret_annot = Option.map_default (List.map fst) [] pf.pdf_rty in
+      let ret_annot = List.map pannot_to_annotations ret_annot in
+      
+      (* Construimos un cuerpo sintético que mapea los argumentos para satisfacer el tipo de retorno *)
+      let ret_exprs = 
+        match args with
+        | [] -> []
+        | (_, (_, _, x)) :: _ ->
+            let rec take n lst = 
+              match n, lst with 
+              | 0, _ -> [] 
+              | _, [] -> [S.Pvar (L.mk_loc loc x)]
+              | n, (_, (_, _, y)) :: rest -> 
+                  S.Pvar (L.mk_loc loc y) :: take (n - 1) rest
+            in
+            take (List.length fs_tout) args
+      in
+      
+      let synthetic_body = { 
+        S.pdb_instr = []; 
+        S.pdb_ret = Location.mk_loc loc (if ret_exprs = [] then None else Some ret_exprs) 
+      } in
+      
+      let body, ret_loc, xret = tt_funbody arch_info envb synthetic_body in
+      let f_args = List.map (fun x -> L.mk_loc (L.loc x) (fst (L.unloc x))) args in
+      let fs_tin = List.map (fun x -> snd (L.unloc x)) args in
+      let f_ret = List.map (fun x -> L.mk_loc (L.loc x) (fst (L.unloc x))) xret in
+      let f_cc = tt_call_conv loc f_args f_ret pf.pdf_cc in
+      let annot, f_contract = tt_contract arch_info env0 f_ret dfl_mut pf in
+      let name = L.unloc pf.pdf_name in
+      let fdef =
+        { P.f_loc   = loc;
+          P.f_annot = process_f_annot loc name f_cc annot;
+          P.f_contract;
+          P.f_cc    = f_cc;
+          P.f_info  = ();
+          P.f_name  = P.F.mk name;
+          P.f_tyin  = List.map P.gty_of_gety fs_tin;
+          P.f_args  = List.map L.unloc f_args;
+          P.f_body  = body;
+          P.f_tyout = List.map P.gty_of_gety fs_tout;
+          P.f_ret_info = { ret_annot; ret_loc };
+          P.f_ret   = f_ret; } in
+
+      check_return_statement ~loc fdef.P.f_name fs_tout
+        (List.map (fun x -> L.loc x, snd (L.unloc x)) xret);
+
+      let return_storage = Option.map_default (List.map (fst |- snd)) [] pf.pdf_rty in
+      check_return_storage ~loc fdef.P.f_name return_storage f_ret;
+
+      Env.Funs.push env0 fdef {fs_tin; fs_tout}
 
 (* -------------------------------------------------------------------- *)
 let tt_global_def pd env (gd:S.gpexpr) =

@@ -319,16 +319,29 @@ let pp_funbody fmt { pdb_instr ; pdb_ret } =
   ) fmt (L.unloc pdb_ret)
 
 let pp_fundef fmt { pdf_cc ; pdf_name ; pdf_args ; pdf_rty ; pdf_body ; pdf_annot } =
-  F.fprintf
-    fmt
-    "%a%a%a %a(%a)%a %a"
-    pp_annotations pdf_annot
-    pp_cc pdf_cc
-    kw "fn"
-    dname (L.unloc pdf_name)
-    (pp_list ", " pp_annot_args) pdf_args
-    pp_rty pdf_rty
-    (pp_inbraces 0 pp_funbody) pdf_body
+  match pdf_body with
+    | Some body ->
+        F.fprintf
+          fmt
+          "%a%a%a %a(%a)%a %a"
+          pp_annotations pdf_annot
+          pp_cc pdf_cc
+          kw "fn"
+          dname (L.unloc pdf_name)
+          (pp_list ", " pp_annot_args) pdf_args
+          pp_rty pdf_rty
+          (pp_inbraces 0 pp_funbody) body
+    | None ->
+        F.fprintf
+          fmt
+          "%a%a%a %a %a(%a)%a;"
+          pp_annotations pdf_annot
+          pp_cc pdf_cc
+          kw "extern"
+          kw "fn"
+          dname (L.unloc pdf_name)
+          (pp_list ", " pp_annot_args) pdf_args
+          pp_rty pdf_rty
 
 let pp_param fmt { ppa_ty ; ppa_name ; ppa_init } =
   F.fprintf fmt "%a %a %a = %a;"
@@ -359,7 +372,10 @@ let pp_typealias fmt id annot ty =
 
 let rec pp_pitem fmt pi =
   match L.unloc pi with
-  | PFundef f -> pp_fundef fmt f
+  | PFundef f -> 
+      (match f.pdf_body with
+       | Some _ -> pp_fundef fmt f
+       | None   -> ())
   | PParam p  -> pp_param fmt p
   | PGlobal g -> pp_global fmt g
   | Pexec _   -> ()

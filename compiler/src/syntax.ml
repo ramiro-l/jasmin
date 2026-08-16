@@ -447,7 +447,7 @@ type pfundef = {
   pdf_name : pident;
   pdf_args : (pannotations * paramdecls) list;
   pdf_rty  : (pannotations * pstotype) list option;
-  pdf_body : pfunbody;
+  pdf_body : pfunbody option;
 }
 
 (* -------------------------------------------------------------------- *)

@@ -48,6 +48,7 @@
 %token HAT
 %token IF
 %token INLINE
+%token EXTERN
 %token <Syntax.sign option> LE
 %token <Syntax.sign option> LT
 %token               LTLT
@@ -489,7 +490,21 @@ pfundef:
       pdf_name = name;
       pdf_args = args;
       pdf_rty  = rty ;
-      pdf_body = body; } }
+      pdf_body = Some body; } }
+| pdf_annot = annotations
+  EXTERN
+  cc=call_conv?
+  FN
+  name = ident
+  args = parens_tuple(annot_pparamdecl)
+  rty  = prefix(RARROW, tuple(annot_stor_type))?
+  SEMICOLON
+  { { Syntax.pdf_annot = pdf_annot;
+      Syntax.pdf_cc    = cc;
+      Syntax.pdf_name  = name;
+      Syntax.pdf_args  = args;
+      Syntax.pdf_rty   = rty;
+      Syntax.pdf_body  = None; } }
 
 (* -------------------------------------------------------------------- *)
 pparam:
@@ -524,10 +539,10 @@ prequire:
 
 (* -------------------------------------------------------------------- *)
 top:
-| x=pfundef  { Syntax.PFundef x }
-| x=pparam   { Syntax.PParam  x }
-| x=pglobal  { Syntax.PGlobal x }
-| x=pexec    { Syntax.Pexec   x }
+| x=pfundef          { Syntax.PFundef x }
+| x=pparam           { Syntax.PParam  x }
+| x=pglobal          { Syntax.PGlobal x }
+| x=pexec            { Syntax.Pexec   x }
 | x=prequire { Syntax.Prequire x}
 | a=annotations TYPE name = ident EQ ty = ptype SEMICOLON
     { Syntax.PTypeAlias (name, a, ty)}

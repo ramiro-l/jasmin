@@ -65,6 +65,7 @@
     "if"    , IF     ;
     "assert", ASSERT ;
     "inline", INLINE ;
+    "extern", EXTERN ;
     "mut"   , MUTABLE;
     "namespace", NAMESPACE;
     "param" , PARAM  ;
