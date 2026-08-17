@@ -1373,6 +1373,9 @@ let rec tt_expr pd ?(mode=`AllVar) (env : 'asm Env.env) pe =
   | S.PECall _ ->
     rs_tyerror ~loc:(L.loc pe) CallNotAllowed
 
+  | S.PECallE _ ->
+    rs_tyerror ~loc:(L.loc pe) CallNotAllowed
+
   | S.PEPrim _ ->
     rs_tyerror ~loc:(L.loc pe) PrimNotAllowed
 
@@ -2018,7 +2021,10 @@ let rec tt_instr arch_info (env : 'asm Env.env) ((pannot,pi) : S.pinstr) : 'asm 
       tt_assign ~tag:E.AT_inline env_lhs env_rhs ls `Raw (L.mk_loc el (S.PECombF(f, args))) None
 
     | ls, `Raw, { L.pl_desc = S.PECall (f, args); pl_loc = el }, None ->
+      let fname = L.unloc f in
       let (f,fsig) = tt_fun env_rhs f in
+      if f.P.f_cc = FInfo.Extern then
+        rs_tyerror ~loc:el (string_error "`%s` is an extern function: call it with `@%s(...)`" fname fname);
       let lvs, is = tt_lvalues arch_info env_lhs (L.loc pi) ls None fsig.fs_tout in
       assert (is = []);
       let es  = tt_exprs_cast arch_info.pd env_rhs (L.loc pi) args fsig.fs_tin in
@@ -2029,6 +2035,18 @@ let rec tt_instr arch_info (env : 'asm Env.env) ((pannot,pi) : S.pinstr) : 'asm 
         else annot
       in
       [mk_i ~annot (mk_call (L.loc pi) is_inline lvs f es)]
+
+    | ls, `Raw, { L.pl_desc = S.PECallE (f, args); pl_loc = el }, None ->
+      let fname = L.unloc f in
+      let (f,fsig) = tt_fun env_rhs f in
+      if f.P.f_cc <> FInfo.Extern then
+        rs_tyerror ~loc:el (string_error "`%s` is not an extern function; `@` is only for extern functions" fname);
+      let lvs, is = tt_lvalues arch_info env_lhs (L.loc pi) ls None fsig.fs_tout in
+      assert (is = []);
+      let es  = tt_exprs_cast arch_info.pd env_rhs (L.loc pi) args fsig.fs_tin in
+      (* TODO (fase externcall/Coq): emitir llamada externa real (externcall).
+         Por ahora se reutiliza la llamada normal (Ccall). *)
+      [mk_i (mk_call (L.loc pi) false lvs f es)]
   | (ls, xs), `Raw, { pl_desc = PEPrim (f, args) }, None
         when L.unloc f = "spill" || L.unloc f = "unspill"  ->
     let op = L.unloc f in

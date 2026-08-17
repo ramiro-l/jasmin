@@ -176,6 +176,7 @@ type pexpr_r =
   | PEBool   of bool
   | PEInt    of int_representation
   | PECall   of pident * pexpr list
+  | PECallE  of pident * pexpr list (* llamada a función externa: @f(...) *)
   | PECombF  of pident * pexpr list
   | PEPrim   of pident * pexpr list
   | PEOp1    of peop1 * pexpr
@@ -275,6 +276,7 @@ module SPrinter = struct
     | PEBool b -> F.fprintf fmt "%s" (if b then "true" else "false")
     | PEInt i -> F.fprintf fmt "%s" i
     | PECall (f, args) -> F.fprintf fmt "%a(%a)" pp_var f (pp_list ", " pp_expr) args
+    | PECallE (f, args) -> F.fprintf fmt "@%a(%a)" pp_var f (pp_list ", " pp_expr) args
     | PECombF (f, args) ->
       F.fprintf fmt "%a(%a)" pp_var f (pp_list ", " pp_expr) args
     | PEPrim (f, args) -> F.fprintf fmt "%a%s(%a)" sharp () (L.unloc f) (pp_list ", " pp_expr) args

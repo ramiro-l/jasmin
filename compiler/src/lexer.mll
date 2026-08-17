@@ -219,6 +219,7 @@ rule main = parse
   | "|"  { PIPE     }
   | "&"  { AMP      }
   | "^"  { HAT      }
+  | "@"  { AT       }
   | "&&" { AMPAMP   }
   | "||" { PIPEPIPE }
   | "="  { EQ       }
