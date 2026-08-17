@@ -266,6 +266,7 @@ let pp_call_conv fmt =
   | FInfo.Export -> Format.fprintf fmt "export@ "
   | FInfo.Internal -> Format.fprintf fmt "inline@ "
   | FInfo.Subroutine -> ()
+  | FInfo.Extern -> Format.fprintf fmt "extern@ "
 
 let pp_return_type pp_size fmt =
   let pp fmt (a, d) =
@@ -299,6 +300,13 @@ let pp_header_ pp_size pp_var fmt fd =
     (pp_return_type pp_size) (List.combine fd.f_ret_info.ret_annot (List.map2 set_var_type ret fd.f_tyout))
 
 let pp_pfun ~debug pp_size pp_opn pp_var fmt fd =
+  if fd.f_cc = FInfo.Extern then
+    (* Función externa: solo se imprime la firma (no tiene cuerpo) *)
+    F.fprintf fmt "@[<h>%a%a%a;@]"
+      pp_annotations fd.f_annot.f_user_annot
+      pp_call_conv fd.f_cc
+      (pp_header_ pp_size pp_var) fd
+  else
   let ds = ScopeTree.get_declaration_sites fd in
   let pp_vd =  pp_var_decl pp_var pp_size in
   let pp_info fmt (n, _) =

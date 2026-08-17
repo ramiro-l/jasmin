@@ -463,7 +463,7 @@ let compile (type reg regx xreg rflag cond asm_op extra_op)
       (fun fd acc ->
         match fd.f_cc with
         | Export -> conv fd :: acc
-        | Internal | Subroutine -> acc)
+        | Internal | Subroutine | Extern -> acc)
       (snd prog) []
   in
 
