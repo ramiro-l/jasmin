@@ -77,6 +77,7 @@
     "true"  , TRUE   ;
     "while" , WHILE  ;
     "export", EXPORT ;
+    "extern", EXTERN ;
     "ArrayInit", ARRAYINIT;
     "_"     , UNDERSCORE;
   ]
@@ -176,7 +177,10 @@ rule main = parse
       {INT s}
 
   | ident as s
-      { Option.default (NID s) (Hash.find_option keywords s) }
+      { let t = Option.default (NID s) (Hash.find_option keywords s) in
+        if s = "extern" then
+          Format.eprintf "DEBUG lexer: `%s` -> token EXTERN@." s;
+        t }
 
   | (size as sw) (wsign as s)
       { SWSIZE(size_of_string sw, mkwsign s)  }

@@ -2595,6 +2595,9 @@ let rec tt_item (arch_info : 'asm P.arch_info) (env : 'asm Env.env) pt : 'asm En
   match L.unloc pt with
   | S.PParam  pp -> tt_param  arch_info.pd env (L.loc pt) pp
   | S.PFundef pf -> tt_fundef arch_info env (L.loc pt) pf
+  | S.PExterndef _ ->
+      (* TODO (Fase 3): registrar la función externa / símbolo *)
+      env
   | S.PGlobal pg -> tt_global arch_info.pd env (L.loc pt) pg
   | S.Pexec   pf ->
     Env.Exec.push (L.loc pt)

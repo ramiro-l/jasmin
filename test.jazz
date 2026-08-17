@@ -1,0 +1,1 @@
+extern fn add(reg u64 x, reg u64 y) -> reg u64;

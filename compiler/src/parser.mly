@@ -79,6 +79,7 @@
 %token UNDERSCORE
 %token WHILE
 %token EXPORT
+%token EXTERN
 %token ARRAYINIT
 %token <string> NID
 %token <Syntax.int_representation> INT
@@ -491,6 +492,18 @@ pfundef:
       pdf_rty  = rty ;
       pdf_body = body; } }
 
+(* Declaración de función externa (sin cuerpo). *)
+externdef:
+| EXTERN FN
+    name = ident
+    args = parens_tuple(annot_pparamdecl)
+    rty  = prefix(RARROW, tuple(annot_stor_type))?
+    SEMICOLON
+
+  { { pex_name = name;
+      pex_args = args;
+      pex_rty  = rty ; } }
+
 (* -------------------------------------------------------------------- *)
 pparam:
 | PARAM ty=ptype x=ident EQ pe=pexpr SEMICOLON
@@ -525,6 +538,7 @@ prequire:
 (* -------------------------------------------------------------------- *)
 top:
 | x=pfundef  { Syntax.PFundef x }
+| x=externdef { Syntax.PExterndef x }
 | x=pparam   { Syntax.PParam  x }
 | x=pglobal  { Syntax.PGlobal x }
 | x=pexec    { Syntax.Pexec   x }

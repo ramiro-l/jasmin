@@ -450,6 +450,13 @@ type pfundef = {
   pdf_body : pfunbody;
 }
 
+(* Declaración de función externa (sin cuerpo). *)
+type pexterndef = {
+  pex_name : pident;
+  pex_args : (pannotations * paramdecls) list;
+  pex_rty  : (pannotations * pstotype) list option;
+}
+
 (* -------------------------------------------------------------------- *)
 type gpexpr =
   | GEexpr  of pexpr
@@ -469,6 +476,7 @@ type prequire = string L.located
 (* -------------------------------------------------------------------- *)
 type pitem =
   | PFundef of pfundef
+  | PExterndef of pexterndef
   | PParam of pparam
   | PGlobal of pglobal
   | Pexec of pexec
