@@ -141,7 +141,7 @@ and pp_expr_rec prio fmt pe =
   | PEBool b -> F.fprintf fmt "%s" (if b then "true" else "false")
   | PEInt i -> F.fprintf fmt "%s" i
   | PECall (f, args) -> F.fprintf fmt "%a(%a)" pp_var f (pp_list ", " pp_expr) args
-  | PECallE (f, args) -> F.fprintf fmt "@%a(%a)" pp_var f (pp_list ", " pp_expr) args
+  | PECallExtern (f, args) -> F.fprintf fmt "@%a(%a)" pp_var f (pp_list ", " pp_expr) args
   | PECombF (f, args) ->
     F.fprintf fmt "%a(%a)" pp_var f (pp_list ", " pp_expr) args
   | PEPrim (f, args) -> F.fprintf fmt "%a%a(%a)" sharp () pprim (L.unloc f) (pp_list ", " pp_expr) args

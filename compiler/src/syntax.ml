@@ -167,21 +167,21 @@ module W = Wsize
 (* -------------------------------------------------------------------- *)
 
 type pexpr_r =
-  | PEParens of pexpr
-  | PEVar    of pident
-  | PEGet    of [`Aligned|`Unaligned] option * arr_access * swsize L.located option * pident * pexpr * pexpr option
-  | PEFetch  of mem_access
-  | PEpack   of svsize * pexpr list
-  | PEstring of string
-  | PEBool   of bool
-  | PEInt    of int_representation
-  | PECall   of pident * pexpr list
-  | PECallE  of pident * pexpr list (* llamada a función externa: @f(...) *)
-  | PECombF  of pident * pexpr list
-  | PEPrim   of pident * pexpr list
-  | PEOp1    of peop1 * pexpr
-  | PEOp2    of peop2 * (pexpr * pexpr)
-  | PEIf of pexpr * pexpr * pexpr
+  | PEParens     of pexpr
+  | PEVar        of pident
+  | PEGet        of [`Aligned|`Unaligned] option * arr_access * swsize L.located option * pident * pexpr * pexpr option
+  | PEFetch      of mem_access
+  | PEpack       of svsize * pexpr list
+  | PEstring     of string
+  | PEBool       of bool
+  | PEInt        of int_representation
+  | PECall       of pident * pexpr list
+  | PECallExtern of pident * pexpr list
+  | PECombF      of pident * pexpr list
+  | PEPrim       of pident * pexpr list
+  | PEOp1        of peop1 * pexpr
+  | PEOp2        of peop2 * (pexpr * pexpr)
+  | PEIf         of pexpr * pexpr * pexpr
 
 and pexpr = pexpr_r L.located
 
@@ -276,7 +276,7 @@ module SPrinter = struct
     | PEBool b -> F.fprintf fmt "%s" (if b then "true" else "false")
     | PEInt i -> F.fprintf fmt "%s" i
     | PECall (f, args) -> F.fprintf fmt "%a(%a)" pp_var f (pp_list ", " pp_expr) args
-    | PECallE (f, args) -> F.fprintf fmt "@%a(%a)" pp_var f (pp_list ", " pp_expr) args
+    | PECallExtern (f, args) -> F.fprintf fmt "@%a(%a)" pp_var f (pp_list ", " pp_expr) args
     | PECombF (f, args) ->
       F.fprintf fmt "%a(%a)" pp_var f (pp_list ", " pp_expr) args
     | PEPrim (f, args) -> F.fprintf fmt "%a%s(%a)" sharp () (L.unloc f) (pp_list ", " pp_expr) args

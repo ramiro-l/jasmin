@@ -1,1 +1,3 @@
+/* extern_decl.jazz: extern fn declaration 
+ * EXPECTED: success                                                          */
 extern fn add(reg u64 x, reg u64 y) -> reg u64;

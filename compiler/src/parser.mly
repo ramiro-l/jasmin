@@ -23,7 +23,7 @@
 %token ALIGNED
 %token AMP
 %token AMPAMP
-%token AT
+%token EXTERNCALL
 %token ASSERT
 %token BANG
 %token BANGEQ
@@ -308,8 +308,8 @@ pexpr_noarr_r(parent):
 | f=var args=parens_tuple(parent)
     { PECall (f, args) }
 
-| AT f=var args=parens_tuple(parent)
-    { PECallE (f, args) }
+| EXTERNCALL f=var args=parens_tuple(parent)
+    { PECallExtern (f, args) }
 
 | f=prim args=parens_tuple(parent)
     { PEPrim (f, args) }
@@ -387,10 +387,10 @@ pinstr_r:
     { let { Location.pl_loc = loc; Location.pl_desc = (f, args) } = fc in
       PIAssign ((None, []), `Raw, Location.mk_loc loc (PECall (f, args)), c) }
 
-| AT fc=loc(f=var args=parens_tuple(pexpr) { (f, args) })
+| EXTERNCALL fc=loc(f=var args=parens_tuple(pexpr) { (f, args) })
     c=prefix(IF, pexpr)? SEMICOLON
     { let { Location.pl_loc = loc; Location.pl_desc = (f, args) } = fc in
-      PIAssign ((None, []), `Raw, Location.mk_loc loc (PECallE (f, args)), c) }
+      PIAssign ((None, []), `Raw, Location.mk_loc loc (PECallExtern (f, args)), c) }
 
 | ASSERT LPAREN msg=loc(STRING) COMMA e=pexpr RPAREN SEMICOLON
     { PIAssert(msg, e) }

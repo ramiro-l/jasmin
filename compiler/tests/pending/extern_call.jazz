@@ -1,3 +1,5 @@
+/* extern_call.jazz: call to an extern fn with @ 
+ * EXPECTED: success                                                          */
 extern fn add(reg u64 x, reg u64 y) -> reg u64;
 
 export fn main(reg u64 a, reg u64 b) -> reg u64 {

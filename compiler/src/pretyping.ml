@@ -1373,7 +1373,7 @@ let rec tt_expr pd ?(mode=`AllVar) (env : 'asm Env.env) pe =
   | S.PECall _ ->
     rs_tyerror ~loc:(L.loc pe) CallNotAllowed
 
-  | S.PECallE _ ->
+  | S.PECallExtern _ ->
     rs_tyerror ~loc:(L.loc pe) CallNotAllowed
 
   | S.PEPrim _ ->
@@ -2036,7 +2036,7 @@ let rec tt_instr arch_info (env : 'asm Env.env) ((pannot,pi) : S.pinstr) : 'asm 
       in
       [mk_i ~annot (mk_call (L.loc pi) is_inline lvs f es)]
 
-    | ls, `Raw, { L.pl_desc = S.PECallE (f, args); pl_loc = el }, None ->
+    | ls, `Raw, { L.pl_desc = S.PECallExtern (f, args); pl_loc = el }, None ->
       let fname = L.unloc f in
       let (f,fsig) = tt_fun env_rhs f in
       if f.P.f_cc <> FInfo.Extern then
