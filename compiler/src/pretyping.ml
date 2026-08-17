@@ -2595,8 +2595,12 @@ let rec tt_item (arch_info : 'asm P.arch_info) (env : 'asm Env.env) pt : 'asm En
   match L.unloc pt with
   | S.PParam  pp -> tt_param  arch_info.pd env (L.loc pt) pp
   | S.PFundef pf -> tt_fundef arch_info env (L.loc pt) pf
-  | S.PExterndef _ ->
-      (* TODO (Fase 3): registrar la función externa / símbolo *)
+  | S.PExterndef pf ->
+      (* DEBUG temporal: ver el AST del externdef *)
+      Format.eprintf "DEBUG AST: PExterndef %s | args=%d | rty=%s@."
+        (L.unloc pf.pex_name)
+        (List.length pf.pex_args)
+        (match pf.pex_rty with None -> "none" | Some l -> string_of_int (List.length l));
       env
   | S.PGlobal pg -> tt_global arch_info.pd env (L.loc pt) pg
   | S.Pexec   pf ->

@@ -537,12 +537,12 @@ prequire:
 
 (* -------------------------------------------------------------------- *)
 top:
-| x=pfundef  { Syntax.PFundef x }
+| x=pfundef   { Syntax.PFundef    x }
 | x=externdef { Syntax.PExterndef x }
-| x=pparam   { Syntax.PParam  x }
-| x=pglobal  { Syntax.PGlobal x }
-| x=pexec    { Syntax.Pexec   x }
-| x=prequire { Syntax.Prequire x}
+| x=pparam    { Syntax.PParam     x }
+| x=pglobal   { Syntax.PGlobal    x }
+| x=pexec     { Syntax.Pexec      x }
+| x=prequire  { Syntax.Prequire   x }
 | a=annotations TYPE name = ident EQ ty = ptype SEMICOLON
     { Syntax.PTypeAlias (name, a, ty)}
 | NAMESPACE name = ident LBRACE pfs = loc(top)* RBRACE
