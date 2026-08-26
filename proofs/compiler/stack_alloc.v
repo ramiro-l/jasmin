@@ -1675,6 +1675,8 @@ Definition alloc_syscall ii rmap rs o es :=
     | _, _ =>
       Error (stk_ierror_no_var "randombytes: invalid args or result")
     end
+  | ExternFunc _ _ _ =>
+        ok (rmap, [:: MkI ii (Csyscall rs o es)])
   end.
 
 Definition is_swap_array o :=

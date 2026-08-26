@@ -47,3 +47,4 @@ Makefile.coq.conf
 
 # nix build output
 result
+_CoqProject

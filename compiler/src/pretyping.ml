@@ -284,6 +284,13 @@ module Env : sig
     val find : A.symbol -> 'asm env -> ((unit, 'asm) P.pfunc * fun_sig) option
   end
 
+  (* 
+  module ExtFuns : sig
+    val push : 'asm env -> P.funname -> fun_sig -> 'asm env
+    val find : A.symbol -> 'asm env -> fun_sig option
+  end 
+  *)
+
   module Exec : sig
     val push : L.t -> P.funname -> (Z.t * Z.t) list -> 'asm env -> 'asm env
     val get  : 'asm env -> (P.funname * (Z.t * Z.t) list) L.located list
@@ -1374,7 +1381,8 @@ let rec tt_expr pd ?(mode=`AllVar) (env : 'asm Env.env) pe =
     rs_tyerror ~loc:(L.loc pe) CallNotAllowed
 
   | S.PECallExtern _ ->
-    rs_tyerror ~loc:(L.loc pe) CallNotAllowed
+    (* TODO: Definir un nuevo tipo de error, ExternCallNotAllowed  *)
+    rs_tyerror ~loc:(L.loc pe) CallNotAllowed 
 
   | S.PEPrim _ ->
     rs_tyerror ~loc:(L.loc pe) PrimNotAllowed
