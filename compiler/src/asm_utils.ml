@@ -9,6 +9,7 @@ let global_datas_label = "glob_data"
 let pp_syscall (o : _ Syscall_t.syscall_t) =
   match o with
   | Syscall_t.RandomBytes _ -> "__jasmin_syscall_randombytes__"
+  | Syscall_t.ExternFunc _ -> "__jasmin_syscall_externfunc__"
 
 let string_of_label name p = Format.asprintf "L%s$%a" (escape name) Z.pp_print (Conv.z_of_pos p)
 

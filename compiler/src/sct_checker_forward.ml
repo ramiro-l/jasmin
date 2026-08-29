@@ -959,11 +959,15 @@ and ty_instr_r is_ct_asm fenv env ((msf,venv) as msf_e :msf_e) i =
   let loc = i.i_loc.L.base_loc in
   match i.i_desc with
   | Csyscall (xs, o, es) ->
-    (* TODO: generalize to other syscalls *)
-    assert (match o with Syscall_t.RandomBytes _ -> true);
-    List.iter (ensure_public_address_expr env venv loc) es;
-    (* We don't known what happen to MSF after external function call *)
-    ty_lvals1 env (MSF.toinit, venv) xs (Env.dsecret env)
+    begin match o with
+    | Syscall_t.RandomBytes _ ->
+      List.iter (ensure_public_address_expr env venv loc) es;
+      (* We don't known what happen to MSF after external function call *)
+      ty_lvals1 env (MSF.toinit, venv) xs (Env.dsecret env)
+    | Syscall_t.ExternFunc _ ->
+      List.iter (ensure_public_address_expr env venv loc) es;
+      ty_lvals1 env (MSF.toinit, venv) xs (Env.dpublic env)
+    end
 
   | Cassgn(mso, _, _, (Pvar x as msi)) when MSF.is_msf msf x.gv ->
     move_msf ~loc env msf_e mso msi
