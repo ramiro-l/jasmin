@@ -256,10 +256,10 @@ let assign_arr params a x e =
   | None, _ | _, None -> a
   | Some d, Some s -> merge_slices params a d s
 
-let syscall_cc (o : 'a Syscall_t.syscall_t) =
+let syscall_cc xs (o : 'a Syscall_t.syscall_t) =
   match o with
   | Syscall_t.RandomBytes _ -> [Some 0]
-  | Syscall_t.ExternFunc _ -> []
+  | Syscall_t.ExternFunc _ -> List.map (fun _ -> None) xs
 
 let link_array_return params a xs es cc =
   List.fold_left2 (fun a x ->
@@ -279,7 +279,7 @@ let rec analyze_instr_r params cc a =
   function
   | Cfor _ -> assert false
   | Ccall (xs, fn, es) -> link_array_return params a xs es (cc fn)
-  | Csyscall (xs, o, es) -> link_array_return params a xs es (syscall_cc o)
+  | Csyscall (xs, o, es) -> link_array_return params a xs es (syscall_cc xs o)
   | Cassgn (x, _, ty, e) -> if is_ty_arr ty then assign_arr params a x e else a
   | Copn (xs, _, o, es) ->
     (* A special case for operators that can return array *)
