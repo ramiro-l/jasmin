@@ -452,10 +452,11 @@ type pfundef = {
   pdf_body : pfunbody;
 }
 
-(* Declaración de función externa (sin cuerpo). *)
+type pfunextern_paramdecl = ptype * pident list
+
 type pfunexterndef = {
   pex_name : pident;
-  pex_args : ptype list;
+  pex_args : pfunextern_paramdecl list;
   pex_rty  : ptype list option;
 }
 

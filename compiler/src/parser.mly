@@ -2,14 +2,6 @@
 
   open Syntax
 
-    (* E.g., if we have [(int, [x; y]); (bool, [z])], it will become 
-     * [int; int; bool]. 
-     * Or if we have [(int, []); (bool, [z])], it will become [int; bool]. *)
-    let flatten_pfunextern_args args =
-      List.concat (List.map (fun (ty, vs) ->
-        if vs == [] then [ty] else List.map (fun _ -> ty) vs
-      ) args)
-
 %}
 
 %token EOF
@@ -520,7 +512,7 @@ pfunexterndef:
     SEMICOLON
 
   { { pex_name = name;
-      pex_args = flatten_pfunextern_args args;
+      pex_args = args;
       pex_rty  = rty ; } }
 
 (* -------------------------------------------------------------------- *)

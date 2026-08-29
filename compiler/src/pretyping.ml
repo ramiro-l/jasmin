@@ -2624,7 +2624,12 @@ let tt_fundef (arch_info : 'asm P.arch_info) (env0 : 'asm Env.env) loc (pf : S.p
 
 (* -------------------------------------------------------------------- *)
 let tt_funexterndef (arch_info : 'asm P.arch_info) (env0 : 'asm Env.env) loc (pe : S.pfunexterndef) : 'asm Env.env =
-  let fs_tin = List.map (tt_type arch_info.pd env0) pe.pex_args in
+  let fs_tin =
+    List.concat_map (fun (ty, vs) ->
+      let ty = tt_type arch_info.pd env0 ty in
+      if List.is_empty vs then [ty] else List.map (fun _ -> ty) vs
+    ) pe.pex_args
+  in
   let fs_tout =
     match pe.pex_rty with
     | None -> []
