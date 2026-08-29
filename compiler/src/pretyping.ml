@@ -41,6 +41,7 @@ type tyerror =
   | GlobWordNotArray
   | EqOpWithNoLValue
   | CallNotAllowed
+  | ExternCallNotAllowed
   | PrimNotAllowed
   | Unsupported         of string
   | UnknownPrim of A.symbol * string
@@ -190,6 +191,10 @@ let pp_tyerror fmt (code : tyerror) =
   | CallNotAllowed ->
       F.fprintf fmt
         "function calls not allowed at that point"
+
+  | ExternCallNotAllowed ->
+      F.fprintf fmt
+        "external function calls not allowed at that point"
 
   | PrimNotAllowed ->
       F.fprintf fmt
@@ -1381,8 +1386,7 @@ let rec tt_expr pd ?(mode=`AllVar) (env : 'asm Env.env) pe =
     rs_tyerror ~loc:(L.loc pe) CallNotAllowed
 
   | S.PECallExtern _ ->
-    (* TODO: Definir un nuevo tipo de error, ExternCallNotAllowed  *)
-    rs_tyerror ~loc:(L.loc pe) CallNotAllowed 
+    rs_tyerror ~loc:(L.loc pe) ExternCallNotAllowed 
 
   | S.PEPrim _ ->
     rs_tyerror ~loc:(L.loc pe) PrimNotAllowed
