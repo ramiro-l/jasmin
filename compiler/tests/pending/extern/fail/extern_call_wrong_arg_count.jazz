@@ -1,0 +1,10 @@
+/* extern_call_wrong_arg_count.jazz: calling external function with wrong number of arguments
+ * EXPECTED: fail 
+ * MESSAGE: typing error: invalid number of arguments, 1 provided instead of 2 */
+extern fn add(u64 x, u64 y) -> u64;
+
+export fn main(reg u64 a) -> reg u64 {
+  reg u64 r;
+  r = @add(a);
+  return r;
+}

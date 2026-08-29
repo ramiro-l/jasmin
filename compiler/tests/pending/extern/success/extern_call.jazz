@@ -1,4 +1,4 @@
-/* extern_call.jazz: call to an extern fn with @ 
+/* extern_call.jazz: valid external function call using @ prefix
  * EXPECTED: success                                                          */
 extern fn add(u64 x, u64 y) -> u64;
 

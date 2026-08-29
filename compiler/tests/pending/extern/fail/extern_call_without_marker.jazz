@@ -1,4 +1,4 @@
-/* extern_call_without_marker.jazz: extern called without @ 
+/* extern_call_without_marker.jazz: calling external function without @ prefix
  * EXPECTED: fail 
  * MESSAGE: typing error: unknown function: `add'             */
 extern fn add(u64 x, u64 y) -> u64;

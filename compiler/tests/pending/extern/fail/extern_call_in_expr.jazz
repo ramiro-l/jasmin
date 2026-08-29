@@ -1,4 +1,4 @@
-/* extern_call_in_expr.jazz
+/* extern_call_in_expr.jazz: calling an external function inside an expression
  * EXPECTED: fail 
  * MESSAGE: typing error: external function calls not allowed at that point */
 extern fn add(u64 x, u64 y) -> u64;
