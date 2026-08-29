@@ -2099,13 +2099,15 @@ let rec tt_instr arch_info (env : 'asm Env.env) ((pannot,pi) : S.pinstr) : 'asm 
       in
       [mk_i ~annot (mk_call (L.loc pi) is_inline lvs f es)]
 
-    | _ls, `Raw, { L.pl_desc = S.PECallExtern (f, args); pl_loc = _el }, None ->
+    | ls, `Raw, { L.pl_desc = S.PECallExtern (f, args); pl_loc = _el }, None ->
       let fname = L.unloc f in
       let (fsig, _loc_def) = tt_funextern env_rhs f in
+      let lvs, is = tt_lvalues arch_info env_lhs (L.loc pi) ls None fsig.fs_tout in
+      assert (is = []); (* function calls return no implicit flag assignments *)
       let es = tt_exprs_cast arch_info.pd env_rhs (L.loc pi) args fsig.fs_tin in
       let tin = List.map epty_to_atype fsig.fs_tin in
       let tout = List.map epty_to_atype fsig.fs_tout in
-      [mk_i (P.Csyscall([], Syscall_t.ExternFunc (fname, tin, tout), es))]
+      [mk_i (P.Csyscall(lvs, Syscall_t.ExternFunc (fname, tin, tout), es))]
       
   | (ls, xs), `Raw, { pl_desc = PEPrim (f, args) }, None
         when L.unloc f = "spill" || L.unloc f = "unspill"  ->
