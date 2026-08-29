@@ -73,6 +73,4 @@ let check_func fd =
   List.rev !errors
 
 let check_prog (_, fds) =
-  (* Las funciones externas no tienen cuerpo: no hay variables que inicializar *)
-  let fds = List.filter (fun fd -> fd.f_cc <> FInfo.Extern) fds in
   List.concat_map check_func (List.rev fds)

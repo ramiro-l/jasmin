@@ -449,7 +449,6 @@ let alloc_stack_fd callstyle pd get_info gtbl fd =
   let ra_on_stack =
     match fd.f_cc with
     | Internal -> assert false
-    | Extern -> assert false (* extern funcs have no body; not compiled here *)
     | Export ->
         if fd.f_annot.retaddr_kind = Some OnReg then
              Utils.warning Always (L.i_loc fd.f_loc [])

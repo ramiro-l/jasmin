@@ -167,21 +167,21 @@ module W = Wsize
 (* -------------------------------------------------------------------- *)
 
 type pexpr_r =
-  | PEParens     of pexpr
-  | PEVar        of pident
-  | PEGet        of [`Aligned|`Unaligned] option * arr_access * swsize L.located option * pident * pexpr * pexpr option
-  | PEFetch      of mem_access
-  | PEpack       of svsize * pexpr list
-  | PEstring     of string
-  | PEBool       of bool
-  | PEInt        of int_representation
-  | PECall       of pident * pexpr list
+  | PEParens of pexpr
+  | PEVar    of pident
+  | PEGet    of [`Aligned|`Unaligned] option * arr_access * swsize L.located option * pident * pexpr * pexpr option
+  | PEFetch  of mem_access
+  | PEpack   of svsize * pexpr list
+  | PEstring of string
+  | PEBool   of bool
+  | PEInt    of int_representation
+  | PECall   of pident * pexpr list
   | PECallExtern of pident * pexpr list
-  | PECombF      of pident * pexpr list
-  | PEPrim       of pident * pexpr list
-  | PEOp1        of peop1 * pexpr
-  | PEOp2        of peop2 * (pexpr * pexpr)
-  | PEIf         of pexpr * pexpr * pexpr
+  | PECombF  of pident * pexpr list
+  | PEPrim   of pident * pexpr list
+  | PEOp1    of peop1 * pexpr
+  | PEOp2    of peop2 * (pexpr * pexpr)
+  | PEIf of pexpr * pexpr * pexpr
 
 and pexpr = pexpr_r L.located
 

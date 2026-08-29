@@ -1983,7 +1983,6 @@ let mk_call loc inline lvs f es =
     List.iter check_lval lvs;
     List.iter check_e es
   | Subroutine -> ()
-  | Extern -> () (* external call: ABI details handled in a future phase *)
   end;
 
   (* Check writability *)
@@ -2082,10 +2081,7 @@ let rec tt_instr arch_info (env : 'asm Env.env) ((pannot,pi) : S.pinstr) : 'asm 
       tt_assign ~tag:E.AT_inline env_lhs env_rhs ls `Raw (L.mk_loc el (S.PECombF(f, args))) None
 
     | ls, `Raw, { L.pl_desc = S.PECall (f, args); pl_loc = el }, None ->
-      let fname = L.unloc f in
       let (f,fsig) = tt_fun env_rhs f in
-      if f.P.f_cc = FInfo.Extern then
-        rs_tyerror ~loc:el (string_error "`%s` is an extern function: call it with `@%s(...)`" fname fname);
       let lvs, is = tt_lvalues arch_info env_lhs (L.loc pi) ls None fsig.fs_tout in
       assert (is = []);
       let es  = tt_exprs_cast arch_info.pd env_rhs (L.loc pi) args fsig.fs_tin in

@@ -28,7 +28,6 @@ type call_conv =
   | Export  (** The function should be exported to the outside word *)
   | Subroutine (** internal function that should not be inlined *)
   | Internal  (** internal function that should be inlined *)
-  | Extern   (** function defined outside the module (no body); external ABI *)
 
 let is_subroutine = function
   | Subroutine -> true

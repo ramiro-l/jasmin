@@ -675,7 +675,6 @@ module Regalloc (Arch : Arch_full.Arch)
          match f.f_cc with
          | Export -> StackDirect
          | Internal -> assert false
-         | Extern -> assert false (* extern funcs have no body; not compiled here *)
          | Subroutine ->
            match Arch.callstyle with
            | Arch_full.StackDirect -> StackDirect
@@ -1297,7 +1296,7 @@ let global_allocation return_addresses (funcs: ('info, 'asm) func list) :
     let written, cg = written_vars_fc f in
     let ra =
       match f.f_cc with
-      | (Export | Internal | Extern) -> Sv.empty
+      | (Export | Internal) -> Sv.empty
       | Subroutine -> vars_retaddr ra
     in
     (* If stable_call_conv is used then all allowed registers are considered as written *)
