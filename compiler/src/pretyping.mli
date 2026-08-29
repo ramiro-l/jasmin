@@ -32,6 +32,11 @@ module Env : sig
       ((unit, 'asm) Prog.pfunc * fun_sig) option
   end
 
+  module ExtFuns : sig
+    val push : 'asm env -> Prog.funname -> (fun_sig * Location.t) -> 'asm env
+    val find : Annotations.symbol -> 'asm env -> (fun_sig * Location.t) option
+  end
+
   module Exec : sig
     val push :
       Location.t -> Prog.funname -> (Z.t * Z.t) list -> 'asm env -> 'asm env

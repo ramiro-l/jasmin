@@ -32,6 +32,7 @@ type tyerror =
   | InvalidArgCount     of int * int
   | InvalidLvalCount    of int * int
   | DuplicateFun        of A.symbol * L.t
+  | DuplicateExtFun     of A.symbol * L.t * L.t
   | DuplicateAlias      of A.symbol * P.epty L.located * P.epty L.located
   | TypeNotFound        of A.symbol
   | InvalidTypeAlias    of A.symbol L.located option * P.epty
@@ -159,6 +160,11 @@ let pp_tyerror fmt (code : tyerror) =
       F.fprintf fmt
         "The function %s is already declared at %s"
         f (L.tostring loc)
+
+  | DuplicateExtFun (f, loc1, loc2) ->
+      F.fprintf fmt
+        "The external function %s is already declared at %s (with signature declared at %s)"
+        f (L.tostring loc1) (L.tostring loc2)
 
   | DuplicateAlias (id, newtype, oldtype) ->
       F.fprintf fmt
@@ -289,12 +295,10 @@ module Env : sig
     val find : A.symbol -> 'asm env -> ((unit, 'asm) P.pfunc * fun_sig) option
   end
 
-  (* 
   module ExtFuns : sig
-    val push : 'asm env -> P.funname -> fun_sig -> 'asm env
-    val find : A.symbol -> 'asm env -> fun_sig option
-  end 
-  *)
+    val push : 'asm env -> P.funname -> (fun_sig * L.t) -> 'asm env
+    val find : A.symbol -> 'asm env -> (fun_sig * L.t) option
+  end
 
   module Exec : sig
     val push : L.t -> P.funname -> (Z.t * Z.t) list -> 'asm env -> 'asm env
@@ -314,6 +318,7 @@ end  = struct
       gb_types : (A.symbol, A.annotations * P.epty L.located) Map.t;
       gb_vars : (A.symbol, P.pvar * P.epty * E.v_scope) Map.t;
       gb_funs : (A.symbol, (unit, 'asm) P.pfunc * fun_sig) Map.t;
+      gb_extfuns : (A.symbol, fun_sig * L.t) Map.t;
     }
 
   type 'asm env = {
@@ -335,7 +340,7 @@ end  = struct
     ; from = Map.empty
     }
 
-  let empty_gb = { gb_vars = Map.empty ; gb_funs = Map.empty; gb_types = Map.empty }
+  let empty_gb = { gb_vars = Map.empty ; gb_funs = Map.empty; gb_types = Map.empty; gb_extfuns = Map.empty }
 
   let empty : 'asm env =
     { e_bindings = [], empty_gb
@@ -376,6 +381,9 @@ end  = struct
   let err_duplicate_fun name (v, _) (fd, _) =
     rs_tyerror ~loc:v.P.f_loc (DuplicateFun(name, fd.P.f_loc))
 
+  let err_duplicate_extfun name (_, loc) (_, loc') =
+    rs_tyerror ~loc (DuplicateExtFun(name, loc, loc'))
+
   let err_duplicate_type name (_, t1) (_, t2) =
     rs_tyerror ~loc:(L.loc t2) (DuplicateAlias (name,t1,t2))
 
@@ -383,6 +391,7 @@ end  = struct
     { gb_vars = merge_bindings warn_duplicate_var ns src.gb_vars dst.gb_vars
     ; gb_funs = merge_bindings err_duplicate_fun ns src.gb_funs dst.gb_funs
     ; gb_types = merge_bindings err_duplicate_type ns src.gb_types dst.gb_types
+    ; gb_extfuns = merge_bindings err_duplicate_extfun ns src.gb_extfuns dst.gb_extfuns
     }
 
   let exit_namespace env =
@@ -568,6 +577,24 @@ end  = struct
       | Some fd ->
          err_duplicate_fun name (v, ()) fd
 
+  end
+
+  module ExtFuns = struct
+    let find (x : A.symbol) (env : 'asm env) =
+      find (fun b -> b.gb_extfuns) x env
+
+    let push env (v : P.funname) (rty : fun_sig * L.t) =
+      let name = v.P.fn_name in
+      let doit m =
+        { m with gb_extfuns = Map.add name rty m.gb_extfuns }
+      in
+      let e_bindings =
+        match env.e_bindings with
+        | [], bot -> [], doit bot
+        | (ns, top) :: stack, bot ->
+           (ns, doit top) :: stack, bot
+      in
+      { env with e_bindings }
   end
 
   module Exec = struct
