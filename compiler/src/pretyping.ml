@@ -33,7 +33,7 @@ type tyerror =
   | InvalidArgCount     of int * int
   | InvalidLvalCount    of int * int
   | DuplicateFun        of A.symbol * L.t
-  | DuplicateExtFun     of A.symbol * L.t * L.t
+  | DuplicateExtFun     of A.symbol * L.t
   | DuplicateAlias      of A.symbol * P.epty L.located * P.epty L.located
   | TypeNotFound        of A.symbol
   | InvalidTypeAlias    of A.symbol L.located option * P.epty
@@ -165,10 +165,10 @@ let pp_tyerror fmt (code : tyerror) =
         "The function %s is already declared at %s"
         f (L.tostring loc)
 
-  | DuplicateExtFun (f, loc1, loc2) ->
+  | DuplicateExtFun (f, loc) ->
       F.fprintf fmt
-        "The external function %s is already declared at %s (with signature declared at %s)"
-        f (L.tostring loc1) (L.tostring loc2)
+        "The external function %s is already declared at %s"
+        f (L.tostring loc)
 
   | DuplicateAlias (id, newtype, oldtype) ->
       F.fprintf fmt
@@ -386,7 +386,7 @@ end  = struct
     rs_tyerror ~loc:v.P.f_loc (DuplicateFun(name, fd.P.f_loc))
 
   let err_duplicate_extfun name (_, loc) (_, loc') =
-    rs_tyerror ~loc (DuplicateExtFun(name, loc, loc'))
+    rs_tyerror ~loc (DuplicateExtFun(name, loc'))
 
   let err_duplicate_type name (_, t1) (_, t2) =
     rs_tyerror ~loc:(L.loc t2) (DuplicateAlias (name,t1,t2))
@@ -588,17 +588,23 @@ end  = struct
       find (fun b -> b.gb_extfuns) x env
 
     let push env (v : P.funname) (rty : fun_sig * L.t) =
-      let name = v.P.fn_name in
-      let doit m =
-        { m with gb_extfuns = Map.add name rty m.gb_extfuns }
-      in
-      let e_bindings =
-        match env.e_bindings with
-        | [], bot -> [], doit bot
-        | (ns, top) :: stack, bot ->
-           (ns, doit top) :: stack, bot
-      in
-      { env with e_bindings }
+    let name = v.P.fn_name in
+    let name = fully_qualified (fst env.e_bindings) name in
+    match find name env with
+    | None ->
+       let doit m =
+         { m with gb_extfuns = Map.add name rty m.gb_extfuns }
+       in
+       let e_bindings =
+         match env.e_bindings with
+         | [], bot -> [], doit bot
+         | (ns, top) :: stack, bot ->
+            (ns, doit top) :: stack, bot
+       in
+       { env with e_bindings }
+    | Some (_, loc) ->
+       err_duplicate_extfun name ((), snd rty) ((), loc)
+
   end
 
   module Exec = struct
