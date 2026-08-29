@@ -668,7 +668,7 @@ let tt_var_global (mode:tt_mode) (env : 'asm Env.env) v =
 let tt_fun (env : 'asm Env.env) { L.pl_desc = x; L.pl_loc = loc; } =
   Env.Funs.find x env |> oget ~exn:(tyerror ~loc (UnknownFun x))
 
-let tt_ext_fun (env : 'asm Env.env) { L.pl_desc = x; L.pl_loc = loc; } =
+let tt_funextern (env : 'asm Env.env) { L.pl_desc = x; L.pl_loc = loc; } =
   Env.ExtFuns.find x env |> oget ~exn:(tyerror ~loc (UnknownExtFun x))
 
 (* -------------------------------------------------------------------- *)
@@ -2099,7 +2099,7 @@ let rec tt_instr arch_info (env : 'asm Env.env) ((pannot,pi) : S.pinstr) : 'asm 
 
     | _ls, `Raw, { L.pl_desc = S.PECallExtern (f, args); pl_loc = _el }, None ->
       let fname = L.unloc f in
-      let (fsig, _loc_def) = tt_ext_fun env_rhs f in
+      let (fsig, _loc_def) = tt_funextern env_rhs f in
       let es = tt_exprs_cast arch_info.pd env_rhs (L.loc pi) args fsig.fs_tin in
       let tin = List.map epty_to_atype fsig.fs_tin in
       let tout = List.map epty_to_atype fsig.fs_tout in
@@ -2619,16 +2619,13 @@ let tt_fundef (arch_info : 'asm P.arch_info) (env0 : 'asm Env.env) loc (pf : S.p
   Env.Funs.push env0 fdef {fs_tin; fs_tout}
 
 (* -------------------------------------------------------------------- *)
-let tt_externdef (arch_info : 'asm P.arch_info) (env0 : 'asm Env.env) loc (pe : S.pexterndef) : 'asm Env.env =
-  let env = Env.Vars.clear_locals env0 in
-  let env, args =
-    let env, args = List.map_fold (tt_annot_paramdecls (fun _ -> false) arch_info.pd) env pe.pex_args in
-    env, List.flatten args in
-  let fs_tin = List.map (fun x -> snd (L.unloc x)) args in
-
-  let rty = Option.default [] pe.pex_rty in
-  let fs_tout = List.map (fun (_, (_, ty)) -> tt_type arch_info.pd env ty) rty in
-
+let tt_funexterndef (arch_info : 'asm P.arch_info) (env0 : 'asm Env.env) loc (pe : S.pfunexterndef) : 'asm Env.env =
+  let fs_tin = List.map (tt_type arch_info.pd env0) pe.pex_args in
+  let fs_tout =
+    match pe.pex_rty with
+    | None -> []
+    | Some rty -> List.map (tt_type arch_info.pd env0) rty
+  in
   let name = L.unloc pe.pex_name in
   Env.ExtFuns.push env0 (P.F.mk name) ({fs_tin; fs_tout}, loc)
 
@@ -2686,8 +2683,8 @@ let rec tt_item (arch_info : 'asm P.arch_info) (env : 'asm Env.env) pt : 'asm En
   match L.unloc pt with
   | S.PParam  pp -> tt_param  arch_info.pd env (L.loc pt) pp
   | S.PFundef pf -> tt_fundef arch_info env (L.loc pt) pf
-  | S.PExterndef pf ->
-      tt_externdef arch_info env (L.loc pt) pf
+  | S.PFunExterndef pf ->
+      tt_funexterndef arch_info env (L.loc pt) pf
   | S.PGlobal pg -> tt_global arch_info.pd env (L.loc pt) pg
   | S.Pexec   pf ->
     Env.Exec.push (L.loc pt)

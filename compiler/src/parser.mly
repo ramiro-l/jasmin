@@ -2,6 +2,14 @@
 
   open Syntax
 
+    (* E.g., if we have [(int, [x; y]); (bool, [z])], it will become 
+     * [int; int; bool]. 
+     * Or if we have [(int, []); (bool, [z])], it will become [int; bool]. *)
+    let flatten_pfunextern_args args =
+      List.concat (List.map (fun (ty, vs) ->
+        if vs == [] then [ty] else List.map (fun _ -> ty) vs
+      ) args)
+
 %}
 
 %token EOF
@@ -501,16 +509,18 @@ pfundef:
       pdf_rty  = rty ;
       pdf_body = body; } }
 
-(* Declaración de función externa (sin cuerpo). *)
-externdef:
+pfunextern_paramdecl:
+| ty = ptype vs = separated_list(empty, var) { (ty, vs) }
+
+pfunexterndef:
 | EXTERN FN
     name = ident
-    args = parens_tuple(annot_pparamdecl)
-    rty  = prefix(RARROW, tuple(annot_stor_type))?
+    args = parens_tuple(pfunextern_paramdecl)
+    rty  = prefix(RARROW, tuple(ptype))?
     SEMICOLON
 
   { { pex_name = name;
-      pex_args = args;
+      pex_args = flatten_pfunextern_args args;
       pex_rty  = rty ; } }
 
 (* -------------------------------------------------------------------- *)
@@ -546,12 +556,12 @@ prequire:
 
 (* -------------------------------------------------------------------- *)
 top:
-| x=pfundef   { Syntax.PFundef    x }
-| x=externdef { Syntax.PExterndef x }
-| x=pparam    { Syntax.PParam     x }
-| x=pglobal   { Syntax.PGlobal    x }
-| x=pexec     { Syntax.Pexec      x }
-| x=prequire  { Syntax.Prequire   x }
+| x=pfundef       { Syntax.PFundef    x }
+| x=pfunexterndef { Syntax.PFunExterndef x }
+| x=pparam        { Syntax.PParam     x }
+| x=pglobal       { Syntax.PGlobal    x }
+| x=pexec         { Syntax.Pexec      x }
+| x=prequire      { Syntax.Prequire   x }
 | a=annotations TYPE name = ident EQ ty = ptype SEMICOLON
     { Syntax.PTypeAlias (name, a, ty)}
 | NAMESPACE name = ident LBRACE pfs = loc(top)* RBRACE

@@ -1,3 +1,11 @@
-/* extern_decl.jazz: extern fn declaration 
+/* extern_decl.jazz: 
  * EXPECTED: success                                                          */
-extern fn add(reg u64 x, reg u64 y) -> reg u64;
+
+extern fn foo() -> u64;
+
+extern fn add2(u64 x, u64 y) -> u64;
+
+extern fn add3(u64 x y z) -> u64;
+
+extern fn add4(u64, u64, u64, u64) -> u64;
+

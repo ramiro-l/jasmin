@@ -453,10 +453,10 @@ type pfundef = {
 }
 
 (* Declaración de función externa (sin cuerpo). *)
-type pexterndef = {
+type pfunexterndef = {
   pex_name : pident;
-  pex_args : (pannotations * paramdecls) list;
-  pex_rty  : (pannotations * pstotype) list option;
+  pex_args : ptype list;
+  pex_rty  : ptype list option;
 }
 
 (* -------------------------------------------------------------------- *)
@@ -478,7 +478,7 @@ type prequire = string L.located
 (* -------------------------------------------------------------------- *)
 type pitem =
   | PFundef of pfundef
-  | PExterndef of pexterndef
+  | PFunExterndef of pfunexterndef
   | PParam of pparam
   | PGlobal of pglobal
   | Pexec of pexec
