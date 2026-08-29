@@ -1,7 +1,7 @@
 /* extern_call_without_marker.jazz: extern called without @ 
  * EXPECTED: fail 
- * MESSAGE: `add` is an extern function: call it with `@add(...)`             */
-extern fn add(reg u64 x, reg u64 y) -> reg u64;
+ * MESSAGE: typing error: unknown function: `add'             */
+extern fn add(u64 x, u64 y) -> u64;
 
 export fn main(reg u64 a, reg u64 b) -> reg u64 {
   reg u64 r;

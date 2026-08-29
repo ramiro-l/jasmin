@@ -96,7 +96,7 @@ let pp_tyerror fmt (code : tyerror) =
       F.fprintf fmt "unknown function: `%s'" x
 
   | UnknownExtFun x ->
-      F.fprintf fmt "unknown external function: `%s'" x
+      F.fprintf fmt "unknown external function: `%s`" x
 
   | InvalidArrayType ty ->
     F.fprintf fmt "the expression has type %a instead of array"

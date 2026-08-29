@@ -1,6 +1,6 @@
 /* extern_call_on_non_extern.jazz: @ on a NON-extern fn 
  * EXPECTED: fail 
- * MESSAGE:`helper` is not an extern function; `@` is only for extern functions */
+ * MESSAGE: typing error: unknown external function: `helper`                 */
 export fn helper(reg u64 x) -> reg u64 {
   return x;
 }
