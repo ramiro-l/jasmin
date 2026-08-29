@@ -6,20 +6,20 @@ open PrintASM
 
 let global_datas_label = "glob_data"
 
+let mangle x =
+  if is_target_system_macos () then
+    Format.asprintf "_%s" x
+  else x
+
 let pp_syscall (o : _ Syscall_t.syscall_t) =
   match o with
   | Syscall_t.RandomBytes _ -> "__jasmin_syscall_randombytes__"
-  | Syscall_t.ExternFunc _ -> "__jasmin_syscall_externfunc__"
+  | Syscall_t.ExternFunc (fn_name, _, _) -> mangle fn_name
 
 let string_of_label name p = Format.asprintf "L%s$%a" (escape name) Z.pp_print (Conv.z_of_pos p)
 
 let pp_remote_label (fn, lbl) =
   string_of_label fn.fn_name lbl
-
-let mangle x =
-  if is_target_system_macos () then
-    Format.asprintf "_%s" x
-  else x
 
 let string_of_glob occurrences x =
   Hash.modify_def (-1) x.v_name Stdlib.Int.succ occurrences;
