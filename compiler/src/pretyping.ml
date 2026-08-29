@@ -22,6 +22,7 @@ type sop = [ `Op2 of S.peop2 | `Op1 of S.peop1]
 type tyerror =
   | UnknownVar          of A.symbol
   | UnknownFun          of A.symbol
+  | UnknownExtFun       of A.symbol
   | InvalidArrayType    of P.epty
   | TypeMismatch        of P.epty pair
   | NoOperator          of sop * P.epty list
@@ -93,6 +94,9 @@ let pp_tyerror fmt (code : tyerror) =
 
   | UnknownFun x ->
       F.fprintf fmt "unknown function: `%s'" x
+
+  | UnknownExtFun x ->
+      F.fprintf fmt "unknown external function: `%s'" x
 
   | InvalidArrayType ty ->
     F.fprintf fmt "the expression has type %a instead of array"
@@ -664,6 +668,9 @@ let tt_var_global (mode:tt_mode) (env : 'asm Env.env) v =
 let tt_fun (env : 'asm Env.env) { L.pl_desc = x; L.pl_loc = loc; } =
   Env.Funs.find x env |> oget ~exn:(tyerror ~loc (UnknownFun x))
 
+let tt_ext_fun (env : 'asm Env.env) { L.pl_desc = x; L.pl_loc = loc; } =
+  Env.ExtFuns.find x env |> oget ~exn:(tyerror ~loc (UnknownExtFun x))
+
 (* -------------------------------------------------------------------- *)
 let check_ty_eq ~loc ~(from : P.epty) ~(to_ : P.epty) =
   if not (P.epty_equal from to_) then
@@ -1128,6 +1135,21 @@ let conv_cty : T.atype -> P.epty = function
     | T.Coq_aint     -> P.etint
     | T.Coq_aword ws -> P.etw ws
     | T.Coq_aarr (ws, n) -> P.ETarr (ws, PE (P.cnst (Conv.z_of_cz n)))
+
+(* Convertir P.epty a Type.atype (inverso de conv_cty) *)
+(* TODO: REVISAR ESTO *)
+let epty_to_atype (ety : P.epty) : T.atype =
+  match ety with
+  | P.ETbool -> T.Coq_abool
+  | P.ETint -> T.Coq_aint
+  | P.ETword (_, ws) -> T.Coq_aword ws
+  | P.ETarr (ws, n) ->
+      let z =
+        match n with
+        | P.PE (P.Pconst z) -> z
+        | _ -> rs_tyerror ~loc: L._dummy (StringError "array size must be constant")
+      in
+      T.Coq_aarr (ws, Conv.cz_of_z z)
 
 let type_of_op2 op =
   let (ty1, ty2), tyo = E.etype_of_op2 op in
@@ -2075,17 +2097,14 @@ let rec tt_instr arch_info (env : 'asm Env.env) ((pannot,pi) : S.pinstr) : 'asm 
       in
       [mk_i ~annot (mk_call (L.loc pi) is_inline lvs f es)]
 
-    | ls, `Raw, { L.pl_desc = S.PECallExtern (f, args); pl_loc = el }, None ->
+    | _ls, `Raw, { L.pl_desc = S.PECallExtern (f, args); pl_loc = _el }, None ->
       let fname = L.unloc f in
-      let (f,fsig) = tt_fun env_rhs f in
-      if f.P.f_cc <> FInfo.Extern then
-        rs_tyerror ~loc:el (string_error "`%s` is not an extern function; `@` is only for extern functions" fname);
-      let lvs, is = tt_lvalues arch_info env_lhs (L.loc pi) ls None fsig.fs_tout in
-      assert (is = []);
-      let es  = tt_exprs_cast arch_info.pd env_rhs (L.loc pi) args fsig.fs_tin in
-      (* TODO (fase externcall/Coq): emitir llamada externa real (externcall).
-         Por ahora se reutiliza la llamada normal (Ccall). *)
-      [mk_i (mk_call (L.loc pi) false lvs f es)]
+      let (fsig, _loc_def) = tt_ext_fun env_rhs f in
+      let es = tt_exprs_cast arch_info.pd env_rhs (L.loc pi) args fsig.fs_tin in
+      let tin = List.map epty_to_atype fsig.fs_tin in
+      let tout = List.map epty_to_atype fsig.fs_tout in
+      [mk_i (P.Csyscall([], Syscall_t.ExternFunc (fname, tin, tout), es))]
+      
   | (ls, xs), `Raw, { pl_desc = PEPrim (f, args) }, None
         when L.unloc f = "spill" || L.unloc f = "unspill"  ->
     let op = L.unloc f in
@@ -2600,46 +2619,18 @@ let tt_fundef (arch_info : 'asm P.arch_info) (env0 : 'asm Env.env) loc (pf : S.p
   Env.Funs.push env0 fdef {fs_tin; fs_tout}
 
 (* -------------------------------------------------------------------- *)
-(* Declaración de función externa: se registra en el entorno con cuerpo
-   vacío y convención [Extern]. El cuerpo/llamada real se implementará en
-   una fase futura (mapeo a syscall / ABI externa). *)
 let tt_externdef (arch_info : 'asm P.arch_info) (env0 : 'asm Env.env) loc (pe : S.pexterndef) : 'asm Env.env =
   let env = Env.Vars.clear_locals env0 in
   let env, args =
     let env, args = List.map_fold (tt_annot_paramdecls (fun _ -> false) arch_info.pd) env pe.pex_args in
     env, List.flatten args in
-  let f_args = List.map (fun x -> L.mk_loc (L.loc x) (fst (L.unloc x))) args in
   let fs_tin = List.map (fun x -> snd (L.unloc x)) args in
-  (* Un `extern` no tiene `return`: sintetizamos variables de retorno
-     (con el kind correcto) para que la firma se pueda imprimir. *)
+
   let rty = Option.default [] pe.pex_rty in
-  let ret_annot = List.map (fun (annot, _) -> pannot_to_annotations annot) rty in
-  let ret_vars =
-    List.mapi (fun i (annot, (sto, ty)) ->
-        let name = Printf.sprintf "ret_%d" i in
-        let x = L.mk_loc loc name in
-        let x, xety = L.unloc (tt_vardecl (fun _ -> false) arch_info.pd env ((pannot_to_annotations annot, (sto, ty)), x)) in
-        (L.mk_loc loc x, xety))
-      rty
-  in
-  let f_ret = List.map fst ret_vars in
-  let fs_tout = List.map snd ret_vars in
-  let f_cc = FInfo.Extern in
+  let fs_tout = List.map (fun (_, (_, ty)) -> tt_type arch_info.pd env ty) rty in
+
   let name = L.unloc pe.pex_name in
-  let fdef =
-    { P.f_loc   = loc;
-      P.f_annot = process_f_annot loc name f_cc [];
-      P.f_contract = None;
-      P.f_cc    = f_cc;
-      P.f_info  = ();
-      P.f_name  = P.F.mk name;
-      P.f_tyin  = List.map P.gty_of_gety fs_tin;
-      P.f_args  = List.map L.unloc f_args;
-      P.f_body  = [];
-      P.f_tyout = List.map P.gty_of_gety fs_tout;
-      P.f_ret_info = { ret_annot; ret_loc = loc };
-      P.f_ret   = f_ret; } in
-  Env.Funs.push env0 fdef {fs_tin; fs_tout}
+  Env.ExtFuns.push env0 (P.F.mk name) ({fs_tin; fs_tout}, loc)
 
 (* -------------------------------------------------------------------- *)
 let tt_global_def pd env (gd:S.gpexpr) =
