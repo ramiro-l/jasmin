@@ -430,8 +430,7 @@ let memory_analysis pp_sr pp_err ~debug callee_saved_strategy up =
         | Export -> stk_size
         | Subroutine ->
           Conv.z_of_cz (Memory_model.round_ws align (Conv.cz_of_z stk_size))
-        | Internal -> assert false
-        in
+        | Internal -> assert false in
       let max_size = Z.add max_stk stk_size in
       match fd.f_cc, fd.f_annot.stack_zero_strategy with
       | Export, Some (_, ows) ->

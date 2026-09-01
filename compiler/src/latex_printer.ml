@@ -361,7 +361,7 @@ let pp_typealias fmt id annot ty =
 let rec pp_pitem fmt pi =
   match L.unloc pi with
   | PFundef f -> pp_fundef fmt f
-  | PFunExterndef _ -> ()
+  | PFunExterndef _ -> () (*TODO: Completar esto*)
   | PParam p  -> pp_param fmt p
   | PGlobal g -> pp_global fmt g
   | Pexec _   -> ()
