@@ -1444,7 +1444,7 @@ end = struct
        in
        let abs = List.fold_left AbsDom.is_init state.abs cells in
        { state with abs }
-    | Syscall_t.ExternFunc _ ->
+    | Syscall_t.ExternFun _ ->
        state
 
   let log = timestamp ()

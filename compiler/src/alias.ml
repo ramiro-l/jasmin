@@ -259,7 +259,7 @@ let assign_arr params a x e =
 let syscall_cc xs (o : 'a Syscall_t.syscall_t) =
   match o with
   | Syscall_t.RandomBytes _ -> [Some 0]
-  | Syscall_t.ExternFunc _ -> List.map (fun _ -> None) xs
+  | Syscall_t.ExternFun _ -> List.map (fun _ -> None) xs
 
 let link_array_return params a xs es cc =
   List.fold_left2 (fun a x ->

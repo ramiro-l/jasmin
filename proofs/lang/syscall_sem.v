@@ -40,7 +40,7 @@ Definition exec_syscall_u
       let len := arr_size ws n in
       Let sv := exec_getrandom_u scs len vs in
       ok (sv.1, m, sv.2)
-  | ExternFunc _ _ _ => type_error
+  | ExternFun _ _ _ => type_error
   end.
 
 Lemma exec_syscallPu scs m o vargs vargs' rscs rm vres :
@@ -97,7 +97,7 @@ Definition sem_syscall (o:syscall_t) :
     syscall_state_t -> mem -> sem_prod (map eval_atype (syscall_sig_s o').(scs_tin)) (exec (syscall_state_t * mem * sem_tuple (map eval_atype (syscall_sig_s o').(scs_tout))))
   with
   | RandomBytes _ _ => exec_getrandom_s_core
-  | ExternFunc _ args _ => fun _ _ =>
+  | ExternFun _ args _ => fun _ _ =>
       (fix loop (ts : seq ctype) : sem_prod ts (exec _) :=
          match ts with
          | [::] => type_error

@@ -964,7 +964,7 @@ and ty_instr_r is_ct_asm fenv env ((msf,venv) as msf_e :msf_e) i =
       List.iter (ensure_public_address_expr env venv loc) es;
       (* We don't known what happen to MSF after external function call *)
       ty_lvals1 env (MSF.toinit, venv) xs (Env.dsecret env)
-    | Syscall_t.ExternFunc _ ->
+    | Syscall_t.ExternFun _ ->
       List.iter (ensure_public_address_expr env venv loc) es;
       ty_lvals1 env (MSF.toinit, venv) xs (Env.dpublic env)
     end

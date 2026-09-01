@@ -22,7 +22,7 @@ type sop = [ `Op2 of S.peop2 | `Op1 of S.peop1]
 type tyerror =
   | UnknownVar          of A.symbol
   | UnknownFun          of A.symbol
-  | UnknownExtFun       of A.symbol
+  | UnknownExternFun    of A.symbol
   | InvalidArrayType    of P.epty
   | TypeMismatch        of P.epty pair
   | NoOperator          of sop * P.epty list
@@ -33,7 +33,7 @@ type tyerror =
   | InvalidArgCount     of int * int
   | InvalidLvalCount    of int * int
   | DuplicateFun        of A.symbol * L.t
-  | DuplicateExtFun     of A.symbol * L.t
+  | DuplicateExternFun  of A.symbol * L.t
   | DuplicateAlias      of A.symbol * P.epty L.located * P.epty L.located
   | TypeNotFound        of A.symbol
   | InvalidTypeAlias    of A.symbol L.located option * P.epty
@@ -95,7 +95,7 @@ let pp_tyerror fmt (code : tyerror) =
   | UnknownFun x ->
       F.fprintf fmt "unknown function: `%s'" x
 
-  | UnknownExtFun x ->
+  | UnknownExternFun x ->
       F.fprintf fmt "unknown external function: `%s`" x
 
   | InvalidArrayType ty ->
@@ -165,7 +165,7 @@ let pp_tyerror fmt (code : tyerror) =
         "The function %s is already declared at %s"
         f (L.tostring loc)
 
-  | DuplicateExtFun (f, loc) ->
+  | DuplicateExternFun (f, loc) ->
       F.fprintf fmt
         "The external function %s is already declared at %s"
         f (L.tostring loc)
@@ -299,7 +299,7 @@ module Env : sig
     val find : A.symbol -> 'asm env -> ((unit, 'asm) P.pfunc * fun_sig) option
   end
 
-  module ExtFuns : sig
+  module ExternFuns : sig
     val push : 'asm env -> P.funname -> (fun_sig * L.t) -> 'asm env
     val find : A.symbol -> 'asm env -> (fun_sig * L.t) option
   end
@@ -322,7 +322,7 @@ end  = struct
       gb_types : (A.symbol, A.annotations * P.epty L.located) Map.t;
       gb_vars : (A.symbol, P.pvar * P.epty * E.v_scope) Map.t;
       gb_funs : (A.symbol, (unit, 'asm) P.pfunc * fun_sig) Map.t;
-      gb_extfuns : (A.symbol, fun_sig * L.t) Map.t;
+      gb_externfuns : (A.symbol, fun_sig * L.t) Map.t;
     }
 
   type 'asm env = {
@@ -344,7 +344,7 @@ end  = struct
     ; from = Map.empty
     }
 
-  let empty_gb = { gb_vars = Map.empty ; gb_funs = Map.empty; gb_types = Map.empty; gb_extfuns = Map.empty }
+  let empty_gb = { gb_vars = Map.empty ; gb_funs = Map.empty; gb_types = Map.empty; gb_externfuns = Map.empty }
 
   let empty : 'asm env =
     { e_bindings = [], empty_gb
@@ -385,8 +385,8 @@ end  = struct
   let err_duplicate_fun name (v, _) (fd, _) =
     rs_tyerror ~loc:v.P.f_loc (DuplicateFun(name, fd.P.f_loc))
 
-  let err_duplicate_extfun name (_, loc) (_, loc') =
-    rs_tyerror ~loc (DuplicateExtFun(name, loc'))
+  let err_duplicate_externfun name (_, loc) (_, loc') =
+    rs_tyerror ~loc (DuplicateExternFun(name, loc'))
 
   let err_duplicate_type name (_, t1) (_, t2) =
     rs_tyerror ~loc:(L.loc t2) (DuplicateAlias (name,t1,t2))
@@ -395,7 +395,7 @@ end  = struct
     { gb_vars = merge_bindings warn_duplicate_var ns src.gb_vars dst.gb_vars
     ; gb_funs = merge_bindings err_duplicate_fun ns src.gb_funs dst.gb_funs
     ; gb_types = merge_bindings err_duplicate_type ns src.gb_types dst.gb_types
-    ; gb_extfuns = merge_bindings err_duplicate_extfun ns src.gb_extfuns dst.gb_extfuns
+    ; gb_externfuns = merge_bindings err_duplicate_externfun ns src.gb_externfuns dst.gb_externfuns
     }
 
   let exit_namespace env =
@@ -583,9 +583,9 @@ end  = struct
 
   end
 
-  module ExtFuns = struct
+  module ExternFuns = struct
     let find (x : A.symbol) (env : 'asm env) =
-      find (fun b -> b.gb_extfuns) x env
+      find (fun b -> b.gb_externfuns) x env
 
     let push env (v : P.funname) (rty : fun_sig * L.t) =
     let name = v.P.fn_name in
@@ -593,7 +593,7 @@ end  = struct
     match find name env with
     | None ->
        let doit m =
-         { m with gb_extfuns = Map.add name rty m.gb_extfuns }
+         { m with gb_externfuns = Map.add name rty m.gb_externfuns }
        in
        let e_bindings =
          match env.e_bindings with
@@ -603,7 +603,7 @@ end  = struct
        in
        { env with e_bindings }
     | Some (_, loc) ->
-       err_duplicate_extfun name ((), snd rty) ((), loc)
+       err_duplicate_externfun name ((), snd rty) ((), loc)
 
   end
 
@@ -674,8 +674,8 @@ let tt_var_global (mode:tt_mode) (env : 'asm Env.env) v =
 let tt_fun (env : 'asm Env.env) { L.pl_desc = x; L.pl_loc = loc; } =
   Env.Funs.find x env |> oget ~exn:(tyerror ~loc (UnknownFun x))
 
-let tt_funextern (env : 'asm Env.env) { L.pl_desc = x; L.pl_loc = loc; } =
-  Env.ExtFuns.find x env |> oget ~exn:(tyerror ~loc (UnknownExtFun x))
+let tt_externfun (env : 'asm Env.env) { L.pl_desc = x; L.pl_loc = loc; } =
+  Env.ExternFuns.find x env |> oget ~exn:(tyerror ~loc (UnknownExternFun x))
 
 (* -------------------------------------------------------------------- *)
 let check_ty_eq ~loc ~(from : P.epty) ~(to_ : P.epty) =
@@ -1440,7 +1440,7 @@ let rec tt_expr pd ?(mode=`AllVar) (env : 'asm Env.env) pe =
   | S.PECall _ ->
     rs_tyerror ~loc:(L.loc pe) CallNotAllowed
 
-  | S.PECallExtern _ ->
+  | S.PEExternCall _ ->
     rs_tyerror ~loc:(L.loc pe) ExternCallNotAllowed 
 
   | S.PEPrim _ ->
@@ -2099,15 +2099,15 @@ let rec tt_instr arch_info (env : 'asm Env.env) ((pannot,pi) : S.pinstr) : 'asm 
       in
       [mk_i ~annot (mk_call (L.loc pi) is_inline lvs f es)]
 
-    | ls, `Raw, { L.pl_desc = S.PECallExtern (f, args); pl_loc = _el }, None ->
+    | ls, `Raw, { L.pl_desc = S.PEExternCall (f, args); pl_loc = _el }, None ->
       let fname = L.unloc f in
-      let (fsig, _loc_def) = tt_funextern env_rhs f in
+      let (fsig, _loc_def) = tt_externfun env_rhs f in
       let lvs, is = tt_lvalues arch_info env_lhs (L.loc pi) ls None fsig.fs_tout in
       assert (is = []); (* function calls return no implicit flag assignments *)
       let es = tt_exprs_cast arch_info.pd env_rhs (L.loc pi) args fsig.fs_tin in
       let tin = List.map epty_to_atype fsig.fs_tin in
       let tout = List.map epty_to_atype fsig.fs_tout in
-      [mk_i (P.Csyscall(lvs, Syscall_t.ExternFunc (fname, tin, tout), es))]
+      [mk_i (P.Csyscall(lvs, Syscall_t.ExternFun (fname, tin, tout), es))]
       
   | (ls, xs), `Raw, { pl_desc = PEPrim (f, args) }, None
         when L.unloc f = "spill" || L.unloc f = "unspill"  ->
@@ -2623,7 +2623,7 @@ let tt_fundef (arch_info : 'asm P.arch_info) (env0 : 'asm Env.env) loc (pf : S.p
   Env.Funs.push env0 fdef {fs_tin; fs_tout}
 
 (* -------------------------------------------------------------------- *)
-let tt_funexterndef (arch_info : 'asm P.arch_info) (env0 : 'asm Env.env) loc (pe : S.pfunexterndef) : 'asm Env.env =
+let tt_externfundef (arch_info : 'asm P.arch_info) (env0 : 'asm Env.env) loc (pe : S.pexternfundef) : 'asm Env.env =
   let fs_tin =
     List.concat_map (fun (ty, vs) ->
       let ty = tt_type arch_info.pd env0 ty in
@@ -2636,7 +2636,7 @@ let tt_funexterndef (arch_info : 'asm P.arch_info) (env0 : 'asm Env.env) loc (pe
     | Some rty -> List.map (tt_type arch_info.pd env0) rty
   in
   let name = L.unloc pe.pex_name in
-  Env.ExtFuns.push env0 (P.F.mk name) ({fs_tin; fs_tout}, loc)
+  Env.ExternFuns.push env0 (P.F.mk name) ({fs_tin; fs_tout}, loc)
 
 (* -------------------------------------------------------------------- *)
 let tt_global_def pd env (gd:S.gpexpr) =
@@ -2692,8 +2692,8 @@ let rec tt_item (arch_info : 'asm P.arch_info) (env : 'asm Env.env) pt : 'asm En
   match L.unloc pt with
   | S.PParam  pp -> tt_param  arch_info.pd env (L.loc pt) pp
   | S.PFundef pf -> tt_fundef arch_info env (L.loc pt) pf
-  | S.PFunExterndef pf ->
-      tt_funexterndef arch_info env (L.loc pt) pf
+  | S.PExternFundef efd ->
+      tt_externfundef arch_info env (L.loc pt) efd
   | S.PGlobal pg -> tt_global arch_info.pd env (L.loc pt) pg
   | S.Pexec   pf ->
     Env.Exec.push (L.loc pt)

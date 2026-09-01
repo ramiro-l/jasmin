@@ -98,10 +98,10 @@ let analyse_stmt (context : signatures) dom stmt =
         ( ( { get_writeset = written_lv w.get_writeset x },
             write_dependencies Sv.empty deps x ),
           Csyscall ([ x ], RandomBytes len, es) )
-    | Csyscall (xs, ExternFunc (fn, tin, tout), es) ->
+    | Csyscall (xs, ExternFun (fn, tin, tout), es) ->
         let d = vars_es es in
         ( (written_lvs w xs, List.fold_left (write_dependencies d) deps xs),
-          Csyscall (xs, ExternFunc (fn, tin, tout), es) )
+          Csyscall (xs, ExternFun (fn, tin, tout), es) )
     | Csyscall _ -> assert false
     | Cassert (msg, e) -> ((w, deps), Cassert (msg, e))
     | Cif (e, th, el) ->

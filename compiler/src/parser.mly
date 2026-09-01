@@ -309,7 +309,7 @@ pexpr_noarr_r(parent):
     { PECall (f, args) }
 
 | EXTERNCALL f=var args=parens_tuple(parent)
-    { PECallExtern (f, args) }
+    { PEExternCall (f, args) }
 
 | f=prim args=parens_tuple(parent)
     { PEPrim (f, args) }
@@ -390,7 +390,7 @@ pinstr_r:
 | EXTERNCALL fc=loc(f=var args=parens_tuple(pexpr) { (f, args) })
     c=prefix(IF, pexpr)? SEMICOLON
     { let { Location.pl_loc = loc; Location.pl_desc = (f, args) } = fc in
-      PIAssign ((None, []), `Raw, Location.mk_loc loc (PECallExtern (f, args)), c) }
+      PIAssign ((None, []), `Raw, Location.mk_loc loc (PEExternCall (f, args)), c) }
 
 | ASSERT LPAREN msg=loc(STRING) COMMA e=pexpr RPAREN SEMICOLON
     { PIAssert(msg, e) }
@@ -501,13 +501,13 @@ pfundef:
       pdf_rty  = rty ;
       pdf_body = body; } }
 
-pfunextern_paramdecl:
+pexternfun_paramdecl:
 | ty = ptype vs = separated_list(empty, var) { (ty, vs) }
 
-pfunexterndef:
+pexternfundef:
 | EXTERN FN
     name = ident
-    args = parens_tuple(pfunextern_paramdecl)
+    args = parens_tuple(pexternfun_paramdecl)
     rty  = prefix(RARROW, tuple(ptype))?
     SEMICOLON
 
@@ -548,8 +548,8 @@ prequire:
 
 (* -------------------------------------------------------------------- *)
 top:
-| x=pfundef       { Syntax.PFundef    x }
-| x=pfunexterndef { Syntax.PFunExterndef x }
+| x=pfundef       { Syntax.PFundef       x }
+| x=pexternfundef { Syntax.PExternFundef x }
 | x=pparam        { Syntax.PParam     x }
 | x=pglobal       { Syntax.PGlobal    x }
 | x=pexec         { Syntax.Pexec      x }

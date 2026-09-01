@@ -14,7 +14,7 @@ let mangle x =
 let pp_syscall (o : _ Syscall_t.syscall_t) =
   match o with
   | Syscall_t.RandomBytes _ -> "__jasmin_syscall_randombytes__"
-  | Syscall_t.ExternFunc (fn_name, _, _) -> mangle fn_name
+  | Syscall_t.ExternFun (fn_name, _, _) -> mangle fn_name
 
 let string_of_label name p = Format.asprintf "L%s$%a" (escape name) Z.pp_print (Conv.z_of_pos p)
 

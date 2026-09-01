@@ -176,7 +176,7 @@ type pexpr_r =
   | PEBool   of bool
   | PEInt    of int_representation
   | PECall   of pident * pexpr list
-  | PECallExtern of pident * pexpr list
+  | PEExternCall of pident * pexpr list
   | PECombF  of pident * pexpr list
   | PEPrim   of pident * pexpr list
   | PEOp1    of peop1 * pexpr
@@ -276,7 +276,7 @@ module SPrinter = struct
     | PEBool b -> F.fprintf fmt "%s" (if b then "true" else "false")
     | PEInt i -> F.fprintf fmt "%s" i
     | PECall (f, args) -> F.fprintf fmt "%a(%a)" pp_var f (pp_list ", " pp_expr) args
-    | PECallExtern (f, args) -> F.fprintf fmt "@%a(%a)" pp_var f (pp_list ", " pp_expr) args
+    | PEExternCall (f, args) -> F.fprintf fmt "@%a(%a)" pp_var f (pp_list ", " pp_expr) args
     | PECombF (f, args) ->
       F.fprintf fmt "%a(%a)" pp_var f (pp_list ", " pp_expr) args
     | PEPrim (f, args) -> F.fprintf fmt "%a%s(%a)" sharp () (L.unloc f) (pp_list ", " pp_expr) args
@@ -452,11 +452,11 @@ type pfundef = {
   pdf_body : pfunbody;
 }
 
-type pfunextern_paramdecl = ptype * pident list
+type pexternfun_paramdecl = ptype * pident list
 
-type pfunexterndef = {
+type pexternfundef = {
   pex_name : pident;
-  pex_args : pfunextern_paramdecl list;
+  pex_args : pexternfun_paramdecl list;
   pex_rty  : ptype list option;
 }
 
@@ -479,7 +479,7 @@ type prequire = string L.located
 (* -------------------------------------------------------------------- *)
 type pitem =
   | PFundef of pfundef
-  | PFunExterndef of pfunexterndef
+  | PExternFundef of pexternfundef
   | PParam of pparam
   | PGlobal of pglobal
   | Pexec of pexec

@@ -1843,7 +1843,7 @@ struct
       let n = arr_size ws (Conv.int_of_cz n) in
       Env.add_randombytes env n;
       Format.asprintf "%s.randombytes_%a" syscall_mod_arg pp_length n
-    | Syscall_t.ExternFunc (name, _, _) ->
+    | Syscall_t.ExternFun (name, _, _) ->
       name
 
   let ec_opn pd msfsz asmOp o =

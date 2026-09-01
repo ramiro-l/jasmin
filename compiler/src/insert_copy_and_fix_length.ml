@@ -111,7 +111,7 @@ and iac_instr_r pd loc ir =
         | _ -> assert false in
       let ws, len = array_kind ty in
       Csyscall(xs, Syscall_t.RandomBytes (ws, Conv.cz_of_int len), es)
-    | Syscall_t.ExternFunc (name, tys, tys') -> Csyscall(xs, Syscall_t.ExternFunc (name, tys, tys'), es)
+    | Syscall_t.ExternFun (name, tys, tys') -> Csyscall(xs, Syscall_t.ExternFun (name, tys, tys'), es)
     end
   | Cassert (msg, e) ->
     Cassert (msg, fix_length_eassert e)
