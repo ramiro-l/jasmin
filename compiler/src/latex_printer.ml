@@ -331,6 +331,28 @@ let pp_fundef fmt { pdf_cc ; pdf_name ; pdf_args ; pdf_rty ; pdf_body ; pdf_anno
     pp_rty pdf_rty
     (pp_inbraces 0 pp_funbody) pdf_body
 
+let pp_extern_args fmt (ty, xs) =
+  match xs with
+  | [] -> pp_type fmt ty
+  | _ -> F.fprintf fmt "%a %a" pp_type ty (pp_list " " pp_var) xs
+
+let pp_extern_rty =
+  pp_opt
+    (fun fmt tys ->
+       F.fprintf fmt " %a %a"
+         arrow ()
+         (pp_list ", " pp_type) tys)
+
+let pp_externfundef fmt { pex_name ; pex_args ; pex_rty } =
+  F.fprintf
+    fmt
+    "%a %a %a(%a)%a;"
+    kw "extern"
+    kw "fn"
+    dname (L.unloc pex_name)
+    (pp_list ", " pp_extern_args) pex_args
+    pp_extern_rty pex_rty
+
 let pp_param fmt { ppa_ty ; ppa_name ; ppa_init } =
   F.fprintf fmt "%a %a %a = %a;"
     kw "param"
@@ -361,7 +383,7 @@ let pp_typealias fmt id annot ty =
 let rec pp_pitem fmt pi =
   match L.unloc pi with
   | PFundef f -> pp_fundef fmt f
-  | PExternFundef _ -> () (*TODO: Completar esto*)
+  | PExternFundef efd -> pp_externfundef fmt efd
   | PParam p  -> pp_param fmt p
   | PGlobal g -> pp_global fmt g
   | Pexec _   -> ()
