@@ -1,0 +1,16 @@
+/* extern_call_subarray.jazz: passing subarray views to an external function
+ * EXPECTED: success                                                          */
+param N = 7;
+extern fn isZero(u64[N] arr) -> u64;
+
+export fn main(reg u64 a, reg u64 b) -> reg u64 {
+  reg u64 r;
+  stack u64[2*N] arr;
+  inline int i;
+  for i=0 to 2*N {
+    arr[i] = 0;
+  }
+  r = @isZero(arr[0:N]);
+  r = @isZero(arr[N:N]);
+  return r;
+}

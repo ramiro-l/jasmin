@@ -1,0 +1,17 @@
+/* extern_call_array_complex_param.jazz: passing a whole stack array to an
+ * external function with a complex parameter expression
+ * EXPECTED: success                                                          */
+param M = 7;
+param N = 3 + M;
+extern fn foo(u64[N + 11] arr) -> u64;
+
+export fn main(reg u64 a, reg u64 b) -> reg u64 {
+  reg u64 r;
+  stack u64[N + 11] arr;
+  inline int i;
+  for i=0 to N + 11 {
+    arr[i] = 0;
+  }
+  r = @foo(arr)
+  return r;
+}

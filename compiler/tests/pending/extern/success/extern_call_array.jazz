@@ -1,0 +1,15 @@
+/* extern_call_array.jazz: passing a whole stack array to an external function
+ * EXPECTED: success                                                          */
+param N = 13;
+extern fn isZero(u64[N] arr) -> u64;
+
+export fn main(reg u64 a, reg u64 b) -> reg u64 {
+  reg u64 r;
+  stack u64[N] arr;
+  inline int i;
+  for i=0 to N {
+    arr[i] = 0;
+  }
+  r = @isZero(arr)
+  return r;
+}
