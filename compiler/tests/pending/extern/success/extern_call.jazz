@@ -1,9 +1,37 @@
 /* extern_call.jazz: valid external function call using @ prefix
  * EXPECTED: success                                                          */
+param M = 7;
+param N = 3 + M;
 extern fn add(u64 x, u64 y) -> u64;
+extern fn isZero(u64[N] arr) -> u64
+// extern fn isZero(u64[N + 8] arr) -> u64
 
-export fn main(reg u64 a, reg u64 b) -> reg u64 {
+export fn main1(reg u64 a, reg u64 b) -> reg u64 {
   reg u64 r;
   r = @add(a, b);
+  return r;
+}
+
+export fn main2(reg u64 a, reg u64 b) -> reg u64 {
+  reg u64 r;
+  stack u64[N] arr;
+  inline int i;
+  for i=0 to N {
+    arr[i] = 0;
+  }
+  r = @isZero(arr)
+  return r;
+}
+
+
+export fn main3(reg u64 a, reg u64 b) -> reg u64 {
+  reg u64 r;
+  stack u64[2*N] arr;
+  inline int i;
+  for i=0 to 2*N {
+    arr[i] = 0;
+  }
+  r = @isZero(arr[0:N]);
+  r = @isZero(arr[N:N]);
   return r;
 }

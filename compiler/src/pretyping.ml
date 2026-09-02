@@ -1151,7 +1151,7 @@ let epty_to_atype (ety : P.epty) : T.atype =
   | P.ETword (_, ws) -> T.Coq_aword ws
   | P.ETarr (ws, n) ->
       let z =
-        match n with
+        match n with (* TODO: revisar este en particular*)
         | P.PE (P.Pconst z) -> z
         | _ -> rs_tyerror ~loc: L._dummy (StringError "array size must be constant")
       in

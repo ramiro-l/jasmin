@@ -1,3 +1,3 @@
-type 'a syscall_t =
-  | RandomBytes of 'a
-  | ExternFun of string * Type.atype list * Type.atype list
+type 'ty syscall_t =
+  | RandomBytes of Wsize.wsize * BinNums.coq_Z
+  | ExternFun of string * 'ty list * 'ty list
