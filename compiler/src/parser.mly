@@ -113,6 +113,15 @@
 var:
 | x=ident { x }
 
+%inline extern_qident:
+| EXTERNCALL f = qident
+    { f }
+| ns = nonempty_list(terminated(NID, COLONCOLON)) EXTERNCALL id = NID
+    { String.concat "::" (ns @ [id]) }
+
+extern_var:
+| x = loc(extern_qident) { x }
+
 (* ** Annotations
 * -------------------------------------------------------------------- *)
 
@@ -308,7 +317,7 @@ pexpr_noarr_r(parent):
 | f=var args=parens_tuple(parent)
     { PECall (f, args) }
 
-| EXTERNCALL f=var args=parens_tuple(parent)
+| f=extern_var args=parens_tuple(parent)
     { PEExternCall (f, args) }
 
 | f=prim args=parens_tuple(parent)
@@ -387,7 +396,7 @@ pinstr_r:
     { let { Location.pl_loc = loc; Location.pl_desc = (f, args) } = fc in
       PIAssign ((None, []), `Raw, Location.mk_loc loc (PECall (f, args)), c) }
 
-| EXTERNCALL fc=loc(f=var args=parens_tuple(pexpr) { (f, args) })
+| fc=loc(f=extern_var args=parens_tuple(pexpr) { (f, args) })
     c=prefix(IF, pexpr)? SEMICOLON
     { let { Location.pl_loc = loc; Location.pl_desc = (f, args) } = fc in
       PIAssign ((None, []), `Raw, Location.mk_loc loc (PEExternCall (f, args)), c) }

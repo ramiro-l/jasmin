@@ -172,6 +172,17 @@ let pp_paren pp fmt x =
 let pp_string fmt s =
   Format.fprintf fmt "%s" s
 
+let pp_extern_name_with pp fmt name =
+  match String.rindex_from_opt name (String.length name - 1) ':' with
+  | Some i when i > 0 && name.[i - 1] = ':' ->
+      let ns = String.sub name 0 (i - 1) in
+      let fn = String.sub name (i + 1) (String.length name - i - 1) in
+      Format.fprintf fmt "%s::@%a" ns pp fn
+  | _ -> Format.fprintf fmt "@%a" pp name
+
+let pp_extern_name fmt name =
+  pp_extern_name_with pp_string fmt name
+
 (* -------------------------------------------------------------------- *)
 type architecture =
   | X86_64

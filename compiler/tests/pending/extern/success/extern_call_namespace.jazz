@@ -25,7 +25,7 @@ namespace D {
     reg u32 r1 r2 r3;
     r1 = @local_fn(a);
     r2 = @global_id(r1);
-    r3 = @A::id(r2);
+    r3 = A::@id(r2);
     return r3;
   }
 }
@@ -34,13 +34,13 @@ export
 fn main(reg u32 a) -> reg u32 {
   reg u32 x y z;
   x = @global_id(a);
-  y = @A::id(x);
-  z = @B :: id();
+  y = A::@id(x);
+  z = B::@id();
   x = y;
   x += z;
-  y = @C::get_val();
+  y = C::@get_val();
   x += y;
-  y = @C::A::id();
+  y = C::A::@id();
   x += y;
   y = D::inner_test(x);
   x += y;

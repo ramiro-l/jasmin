@@ -99,6 +99,8 @@ val pp_paren : 'a pp -> 'a pp
 
 (* -------------------------------------------------------------------- *)
 val pp_string : string pp
+val pp_extern_name_with : string pp -> string pp
+val pp_extern_name : string pp
  
 (* -------------------------------------------------------------------- *)
 type architecture =

@@ -155,7 +155,7 @@ let pp_cast_opn fmt = function
 let pp_syscall (o : 'ty Syscall_t.syscall_t) =
   match o with
   | Syscall_t.RandomBytes _ -> "#randombytes"
-  | Syscall_t.ExternFun (name, _, _) -> Format.sprintf "@%s" name
+  | Syscall_t.ExternFun (name, _, _) -> Format.asprintf "%a" pp_extern_name name
 
 (* -------------------------------------------------------------------- *)
 let pp_bool fmt b = if b then fprintf fmt "true" else fprintf fmt "false"

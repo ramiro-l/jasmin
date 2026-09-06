@@ -9,6 +9,6 @@ namespace A {
 
 export fn main(reg u64 a) -> reg u64 {
   reg u64 r;
-  r = @A::foo(a);
+  r = A::@foo(a);
   return r;
 }
