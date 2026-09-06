@@ -589,7 +589,6 @@ end  = struct
 
     let push env (v : P.funname) (rty : fun_sig * L.t) =
     let name = v.P.fn_name in
-    let name = fully_qualified (fst env.e_bindings) name in
     match find name env with
     | None ->
        let doit m =

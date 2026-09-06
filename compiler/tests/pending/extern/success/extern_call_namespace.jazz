@@ -1,0 +1,48 @@
+/* extern_call_namespace.jazz: external function declarations and calls in/across namespaces
+ * EXPECTED: success                                                          */
+
+extern fn global_id(u32 x) -> u32;
+
+namespace A {
+  extern fn id(u32 x) -> u32;
+}
+
+namespace B {
+  extern fn id() -> u32;
+}
+
+namespace C {
+  extern fn get_val() -> u32;
+  namespace A {
+    extern fn id() -> u32;
+  }
+}
+
+namespace D {
+  extern fn local_fn(u32 x) -> u32;
+
+  fn inner_test(reg u32 a) -> reg u32 {
+    reg u32 r1 r2 r3;
+    r1 = @local_fn(a);
+    r2 = @global_id(r1);
+    r3 = @A::id(r2);
+    return r3;
+  }
+}
+
+export
+fn main(reg u32 a) -> reg u32 {
+  reg u32 x y z;
+  x = @global_id(a);
+  y = @A::id(x);
+  z = @B :: id();
+  x = y;
+  x += z;
+  y = @C::get_val();
+  x += y;
+  y = @C::A::id();
+  x += y;
+  y = D::inner_test(x);
+  x += y;
+  return x;
+}

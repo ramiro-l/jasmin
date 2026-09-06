@@ -1,0 +1,14 @@
+/* extern_call_namespace_non_extern.jazz: using @ prefix on an internal namespace function
+ * EXPECTED: fail
+ * MESSAGE: typing error: unknown external function: `A::foo`                 */
+namespace A {
+  fn foo(reg u64 x) -> reg u64 {
+    return x;
+  }
+}
+
+export fn main(reg u64 a) -> reg u64 {
+  reg u64 r;
+  r = @A::foo(a);
+  return r;
+}

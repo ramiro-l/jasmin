@@ -1,0 +1,8 @@
+/* extern_call_namespace_not_found.jazz: calling an external function in a non-existent namespace
+ * EXPECTED: fail
+ * MESSAGE: typing error: unknown external function: `NonExistent::foo`       */
+export fn main() -> reg u64 {
+  reg u64 r;
+  r = @NonExistent::foo();
+  return r;
+}
