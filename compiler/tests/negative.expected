@@ -580,6 +580,174 @@ fail/common/bug_1214.jazz:
 compilation error in function main:
 stack allocation: the region associated to variable x is partial
 
+fail/common/extern/extern_call_eqop.jazz:
+
+"fail/common/extern/extern_call_eqop.jazz", line 6 (7-17): external function calls not allowed at that point
+
+fail/common/extern/extern_call_eqop.jazz:
+
+"fail/common/extern/extern_call_eqop.jazz", line 6 (7-17): external function calls not allowed at that point
+
+fail/common/extern/extern_call_eqop.jazz:
+
+"fail/common/extern/extern_call_eqop.jazz", line 6 (7-17): external function calls not allowed at that point
+
+fail/common/extern/extern_call_in_expr.jazz:
+
+"fail/common/extern/extern_call_in_expr.jazz", line 5 (10-20): external function calls not allowed at that point
+
+fail/common/extern/extern_call_in_expr.jazz:
+
+"fail/common/extern/extern_call_in_expr.jazz", line 5 (10-20): external function calls not allowed at that point
+
+fail/common/extern/extern_call_in_expr.jazz:
+
+"fail/common/extern/extern_call_in_expr.jazz", line 5 (10-20): external function calls not allowed at that point
+
+fail/common/extern/extern_call_namespace_non_extern.jazz:
+
+"fail/common/extern/extern_call_namespace_non_extern.jazz", line 9 (6-13): unknown external function: `A::foo`
+
+fail/common/extern/extern_call_namespace_non_extern.jazz:
+
+"fail/common/extern/extern_call_namespace_non_extern.jazz", line 9 (6-13): unknown external function: `A::foo`
+
+fail/common/extern/extern_call_namespace_non_extern.jazz:
+
+"fail/common/extern/extern_call_namespace_non_extern.jazz", line 9 (6-13): unknown external function: `A::foo`
+
+fail/common/extern/extern_call_namespace_not_found.jazz:
+
+"fail/common/extern/extern_call_namespace_not_found.jazz", line 3 (6-23): unknown external function: `NonExistent::foo`
+
+fail/common/extern/extern_call_namespace_not_found.jazz:
+
+"fail/common/extern/extern_call_namespace_not_found.jazz", line 3 (6-23): unknown external function: `NonExistent::foo`
+
+fail/common/extern/extern_call_namespace_not_found.jazz:
+
+"fail/common/extern/extern_call_namespace_not_found.jazz", line 3 (6-23): unknown external function: `NonExistent::foo`
+
+fail/common/extern/extern_call_namespace_out_of_scope.jazz:
+
+"fail/common/extern/extern_call_namespace_out_of_scope.jazz", line 7 (6-10): unknown external function: `foo`
+
+fail/common/extern/extern_call_namespace_out_of_scope.jazz:
+
+"fail/common/extern/extern_call_namespace_out_of_scope.jazz", line 7 (6-10): unknown external function: `foo`
+
+fail/common/extern/extern_call_namespace_out_of_scope.jazz:
+
+"fail/common/extern/extern_call_namespace_out_of_scope.jazz", line 7 (6-10): unknown external function: `foo`
+
+fail/common/extern/extern_call_namespace_wrong_arg_count.jazz:
+
+"fail/common/extern/extern_call_namespace_wrong_arg_count.jazz", line 7 (2-20): invalid number of arguments, 2 provided instead of 1
+
+fail/common/extern/extern_call_namespace_wrong_arg_count.jazz:
+
+"fail/common/extern/extern_call_namespace_wrong_arg_count.jazz", line 7 (2-20): invalid number of arguments, 2 provided instead of 1
+
+fail/common/extern/extern_call_namespace_wrong_arg_count.jazz:
+
+"fail/common/extern/extern_call_namespace_wrong_arg_count.jazz", line 7 (2-20): invalid number of arguments, 2 provided instead of 1
+
+fail/common/extern/extern_call_on_non_extern.jazz:
+
+"fail/common/extern/extern_call_on_non_extern.jazz", line 7 (6-13): unknown external function: `helper`
+
+fail/common/extern/extern_call_on_non_extern.jazz:
+
+"fail/common/extern/extern_call_on_non_extern.jazz", line 7 (6-13): unknown external function: `helper`
+
+fail/common/extern/extern_call_on_non_extern.jazz:
+
+"fail/common/extern/extern_call_on_non_extern.jazz", line 7 (6-13): unknown external function: `helper`
+
+fail/common/extern/extern_call_type_mismatch.jazz:
+
+"fail/common/extern/extern_call_type_mismatch.jazz", line 7 (14-15): can not implicitly cast bool into u64
+
+fail/common/extern/extern_call_type_mismatch.jazz:
+
+"fail/common/extern/extern_call_type_mismatch.jazz", line 7 (14-15): can not implicitly cast bool into u64
+
+fail/common/extern/extern_call_type_mismatch.jazz:
+
+"fail/common/extern/extern_call_type_mismatch.jazz", line 7 (14-15): can not implicitly cast bool into u64
+
+fail/common/extern/extern_call_without_marker.jazz:
+
+"fail/common/extern/extern_call_without_marker.jazz", line 5 (6-9): unknown function: `add'
+
+fail/common/extern/extern_call_without_marker.jazz:
+
+"fail/common/extern/extern_call_without_marker.jazz", line 5 (6-9): unknown function: `add'
+
+fail/common/extern/extern_call_without_marker.jazz:
+
+"fail/common/extern/extern_call_without_marker.jazz", line 5 (6-9): unknown function: `add'
+
+fail/common/extern/extern_call_wrong_arg_count.jazz:
+
+"fail/common/extern/extern_call_wrong_arg_count.jazz", line 5 (2-14): invalid number of arguments, 1 provided instead of 2
+
+fail/common/extern/extern_call_wrong_arg_count.jazz:
+
+"fail/common/extern/extern_call_wrong_arg_count.jazz", line 5 (2-14): invalid number of arguments, 1 provided instead of 2
+
+fail/common/extern/extern_call_wrong_arg_count.jazz:
+
+"fail/common/extern/extern_call_wrong_arg_count.jazz", line 5 (2-14): invalid number of arguments, 1 provided instead of 2
+
+fail/common/extern/extern_call_wrong_return_count.jazz:
+
+"fail/common/extern/extern_call_wrong_return_count.jazz", line 5 (2-20): invalid number of lvalues, 1 provided instead of 2
+
+fail/common/extern/extern_call_wrong_return_count.jazz:
+
+"fail/common/extern/extern_call_wrong_return_count.jazz", line 5 (2-20): invalid number of lvalues, 1 provided instead of 2
+
+fail/common/extern/extern_call_wrong_return_count.jazz:
+
+"fail/common/extern/extern_call_wrong_return_count.jazz", line 5 (2-20): invalid number of lvalues, 1 provided instead of 2
+
+fail/common/extern/extern_decl_duplicate.jazz:
+
+"fail/common/extern/extern_decl_duplicate.jazz", line 2 (0-23): The external function foo is already declared at "fail/common/extern/extern_decl_duplicate.jazz", line 1 (0-23)
+
+fail/common/extern/extern_decl_duplicate.jazz:
+
+"fail/common/extern/extern_decl_duplicate.jazz", line 2 (0-23): The external function foo is already declared at "fail/common/extern/extern_decl_duplicate.jazz", line 1 (0-23)
+
+fail/common/extern/extern_decl_duplicate.jazz:
+
+"fail/common/extern/extern_decl_duplicate.jazz", line 2 (0-23): The external function foo is already declared at "fail/common/extern/extern_decl_duplicate.jazz", line 1 (0-23)
+
+fail/common/extern/extern_decl_duplicate_global_and_namespace.jazz:
+
+"fail/common/extern/extern_decl_duplicate_global_and_namespace.jazz", line 4 (2-30): The external function foo is already declared at "fail/common/extern/extern_decl_duplicate_global_and_namespace.jazz", line 1 (0-28)
+
+fail/common/extern/extern_decl_duplicate_global_and_namespace.jazz:
+
+"fail/common/extern/extern_decl_duplicate_global_and_namespace.jazz", line 4 (2-30): The external function foo is already declared at "fail/common/extern/extern_decl_duplicate_global_and_namespace.jazz", line 1 (0-28)
+
+fail/common/extern/extern_decl_duplicate_global_and_namespace.jazz:
+
+"fail/common/extern/extern_decl_duplicate_global_and_namespace.jazz", line 4 (2-30): The external function foo is already declared at "fail/common/extern/extern_decl_duplicate_global_and_namespace.jazz", line 1 (0-28)
+
+fail/common/extern/extern_decl_duplicate_namespace.jazz:
+
+"fail/common/extern/extern_decl_duplicate_namespace.jazz", line 3 (2-25): The external function foo is already declared at "fail/common/extern/extern_decl_duplicate_namespace.jazz", line 2 (2-25)
+
+fail/common/extern/extern_decl_duplicate_namespace.jazz:
+
+"fail/common/extern/extern_decl_duplicate_namespace.jazz", line 3 (2-25): The external function foo is already declared at "fail/common/extern/extern_decl_duplicate_namespace.jazz", line 2 (2-25)
+
+fail/common/extern/extern_decl_duplicate_namespace.jazz:
+
+"fail/common/extern/extern_decl_duplicate_namespace.jazz", line 3 (2-25): The external function foo is already declared at "fail/common/extern/extern_decl_duplicate_namespace.jazz", line 2 (2-25)
+
 fail/common/inline-remains.jazz:
 
 "fail/common/inline-remains.jazz", line 4 (2) to line 8 (3):
@@ -1750,7 +1918,7 @@ Allowed args are:
 
 Statistics:
 	Annots:      4
-	Pretyping:  49
+	Pretyping:  91
 	Parsing:     4
 	Typing:      5
 	Compile:   218

@@ -1,9 +1,0 @@
-/* extern_decl_duplicate_global_and_namespace.jazz: declaring an external function in a namespace when a global one with the same name exists
- * EXPECTED: fail
- * MESSAGE: typing error: The external function foo is already declared      */
-
-extern fn foo(u64 x) -> u64;
-
-namespace A {
-  extern fn foo(u64 x) -> u64;
-}

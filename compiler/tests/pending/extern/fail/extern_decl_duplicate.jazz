@@ -1,7 +1,0 @@
-/* extern_decl_duplicate.jazz: duplicate declaration of an external function
- * EXPECTED: fail 
- * MESSAGE: extern_decl_duplicate.jazz", line 5 (0-23): 
-            typing error: The external function foo is already declared at 
-            "tests/pending/extern_decl_duplicate.jazz", line 4 (0-23)         */
-extern fn foo() -> u64;
-extern fn foo() -> u64;

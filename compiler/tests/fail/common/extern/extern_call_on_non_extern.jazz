@@ -1,0 +1,9 @@
+export fn helper(reg u64 x) -> reg u64 {
+  return x;
+}
+
+export fn main(reg u64 a) -> reg u64 {
+  reg u64 r;
+  r = @helper(a);
+  return r;
+}

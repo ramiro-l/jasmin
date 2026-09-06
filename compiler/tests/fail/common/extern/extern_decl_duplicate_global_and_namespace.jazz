@@ -1,0 +1,5 @@
+extern fn foo(u64 x) -> u64;
+
+namespace A {
+  extern fn foo(u64 x) -> u64;
+}

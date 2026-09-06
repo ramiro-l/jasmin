@@ -1,0 +1,7 @@
+extern fn add(u64 x, u64 y) -> u64;
+
+export fn main(reg u64 a) -> reg u64 {
+  reg u64 r;
+  r = @add(a);
+  return r;
+}
