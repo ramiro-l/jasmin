@@ -152,7 +152,7 @@ let pp_cast_opn fmt = function
   | _ -> ()
 
 (* -------------------------------------------------------------------- *)
-let pp_syscall (o : 'a Syscall_t.syscall_t) =
+let pp_syscall (o : 'ty Syscall_t.syscall_t) =
   match o with
   | Syscall_t.RandomBytes _ -> "#randombytes"
   | Syscall_t.ExternFun (name, _, _) -> Format.sprintf "@%s" name

@@ -60,6 +60,12 @@ let rec gsubst_a flen f = function
 let gsubst_as flen f = List.map (fun (msg,a) -> (msg, gsubst_a flen f a))
 
 
+let gsubst_syscall flen = function
+  | Syscall_t.RandomBytes (ws, n) -> Syscall_t.RandomBytes (ws, n)
+  | Syscall_t.ExternFun (fname, tin, tout) ->
+    let gty = gsubst_ty (flen ?loc:None) in
+    Syscall_t.ExternFun (fname, List.map gty tin, List.map gty tout)
+
 let rec gsubst_i (flen: ?loc:L.t -> 'len1 -> 'len2) f i =
   let i_desc =
     match i.i_desc with
@@ -69,7 +75,7 @@ let rec gsubst_i (flen: ?loc:L.t -> 'len1 -> 'len2) f i =
       let ty = gsubst_ty (flen ?loc:None) ty in
       Cassgn(x, tg, ty, e)
     | Copn(x,t,o,e)   -> Copn(gsubst_lvals flen f x, t, o, gsubst_es flen f e)
-    | Csyscall(x,o,e)   -> Csyscall(gsubst_lvals flen f x, o, gsubst_es flen f e)
+    | Csyscall(x,o,e)   -> Csyscall(gsubst_lvals flen f x, gsubst_syscall flen o, gsubst_es flen f e)
     | Cassert (msg, e)  -> Cassert (msg, gsubst_a flen f e)
     | Cif(e,c1,c2)  -> Cif(gsubst_e flen f e, gsubst_c flen f c1, gsubst_c flen f c2)
     | Cfor(x,(d,e1,e2),c) ->

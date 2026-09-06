@@ -1142,21 +1142,6 @@ let conv_cty : T.atype -> P.epty = function
     | T.Coq_aword ws -> P.etw ws
     | T.Coq_aarr (ws, n) -> P.ETarr (ws, PE (P.cnst (Conv.z_of_cz n)))
 
-(* Convertir P.epty a Type.atype (inverso de conv_cty) *)
-(* TODO: REVISAR ESTO *)
-let epty_to_atype (ety : P.epty) : T.atype =
-  match ety with
-  | P.ETbool -> T.Coq_abool
-  | P.ETint -> T.Coq_aint
-  | P.ETword (_, ws) -> T.Coq_aword ws
-  | P.ETarr (ws, n) ->
-      let z =
-        match n with (* TODO: revisar este en particular*)
-        | P.PE (P.Pconst z) -> z
-        | _ -> rs_tyerror ~loc: L._dummy (StringError "array size must be constant")
-      in
-      T.Coq_aarr (ws, Conv.cz_of_z z)
-
 let type_of_op2 op =
   let (ty1, ty2), tyo = E.etype_of_op2 op in
   conv_ty ty1, conv_ty ty2, conv_ty tyo
@@ -2105,8 +2090,8 @@ let rec tt_instr arch_info (env : 'asm Env.env) ((pannot,pi) : S.pinstr) : 'asm 
       let lvs, is = tt_lvalues arch_info env_lhs (L.loc pi) ls None fsig.fs_tout in
       assert (is = []); (* function calls return no implicit flag assignments *)
       let es = tt_exprs_cast arch_info.pd env_rhs (L.loc pi) args fsig.fs_tin in
-      let tin = List.map epty_to_atype fsig.fs_tin in
-      let tout = List.map epty_to_atype fsig.fs_tout in
+      let tin = List.map P.gty_of_gety fsig.fs_tin in
+      let tout = List.map P.gty_of_gety fsig.fs_tout in
       [mk_i (P.Csyscall(lvs, Syscall_t.ExternFun (fname, tin, tout), es))]
       
   | (ls, xs), `Raw, { pl_desc = PEPrim (f, args) }, None

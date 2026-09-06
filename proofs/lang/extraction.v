@@ -6,7 +6,7 @@ From Coq Require ExtrOcamlBasic.
 From Coq Require ExtrOcamlNativeString.
 From Coq Require ExtrOCamlInt63.
 
-
+Extract Inductive syscall.syscall_t => "Type.atype Syscall_t.syscall_t" ["Syscall_t.RandomBytes" "Syscall_t.ExternFun"].
 Set Extraction File Comment "This prelude is added at extraction time. See lang/extraction.v. *) [@@@ocaml.warning ""-9-20-27-32-33-34-37-39-50-67""] (* End of prelude. ".
 
 Extraction Inline ssrbool.is_left.

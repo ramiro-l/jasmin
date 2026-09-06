@@ -16,7 +16,7 @@ val pp_cast_opn :
   Format.formatter ->
     ('asm_op, 'extra_op) Arch_extra.extended_op_gen Sopn.sopn -> unit
 
-val pp_syscall : (Wsize.wsize * BinNums.coq_Z) Syscall_t.syscall_t -> string
+val pp_syscall : 'ty Syscall_t.syscall_t -> string
 val pp_bool : Format.formatter -> bool -> unit
 val pp_kind : Format.formatter -> Wsize.v_kind -> unit
 val pp_btype : ?w:Wsize.signedness -> Format.formatter -> Prog.base_ty -> unit

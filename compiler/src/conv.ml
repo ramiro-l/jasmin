@@ -163,6 +163,18 @@ let assertion_of_cassertions  = List.map assertion_of_cassertion
 
 (* ------------------------------------------------------------------------ *)
 
+let csyscall_of_syscall = function
+  | Syscall_t.RandomBytes (ws, n) -> Syscall_t.RandomBytes (ws, n)
+  | Syscall_t.ExternFun (name, tin, tout) ->
+    Syscall_t.ExternFun (name, List.map cty_of_ty tin, List.map cty_of_ty tout)
+
+let syscall_of_csyscall = function
+  | Syscall_t.RandomBytes (ws, n) -> Syscall_t.RandomBytes (ws, n)
+  | Syscall_t.ExternFun (name, tin, tout) ->
+    Syscall_t.ExternFun (name, List.map ty_of_cty tin, List.map ty_of_cty tout)
+
+(* ------------------------------------------------------------------------ *)
+
 let rec cinstr_of_instr i =
   let n = i.i_loc, i.i_annot in
   cinstr_r_of_instr_r n i.i_desc
@@ -181,7 +193,7 @@ and cinstr_r_of_instr_r p i =
 
   | Csyscall(x,o,e) ->
     let ir =
-      C.Csyscall(clval_of_lvals x, o, cexpr_of_exprs e) in
+      C.Csyscall(clval_of_lvals x, csyscall_of_syscall o, cexpr_of_exprs e) in
     C.MkI(p, ir)
 
   | Cassert (msg, e) ->
@@ -226,7 +238,7 @@ and instr_r_of_cinstr_r = function
     Copn(lval_of_clvals x, t, o, expr_of_cexprs e)
 
   | C.Csyscall(x,o,e) ->
-    Csyscall(lval_of_clvals x, o, expr_of_cexprs e)
+    Csyscall(lval_of_clvals x, syscall_of_csyscall o, expr_of_cexprs e)
 
   | C.Cassert (msg, e) ->
      Cassert (msg, eassert_of_ceassert e)

@@ -1882,7 +1882,7 @@ struct
           (ec_pcall env lvs leak_lvs otys [Env.get_funname env f] args) @
           (ec_leak_call_acc env)
       | Csyscall (lvs, o, es) ->
-          let s = Syscall.syscall_sig_u o in
+          let s = Syscall.syscall_sig_u (Conv.csyscall_of_syscall o) in
           let otys = List.map Conv.ty_of_cty s.scs_tout in
           let itys =  List.map Conv.ty_of_cty s.scs_tin in
           let args = List.map (toec_cast env) (List.combine itys es) in
