@@ -1,0 +1,10 @@
+extern fn add(u64 x, u64 y) -> u64;
+
+export fn run_multiply(reg u64 a, reg u64 b) -> reg u64 {
+  reg u64 r;
+  while (a > 0) {
+    r = @add(r, b);
+    a -= 1;
+  }
+  return r;
+}

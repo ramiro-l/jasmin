@@ -1,0 +1,7 @@
+extern fn add(u64 x, u64 y) -> u64;
+
+export fn run_add(reg u64 a, reg u64 b) -> reg u64 {
+  reg u64 r;
+  r = @add(a, b);
+  return r;
+}
