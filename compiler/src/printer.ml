@@ -467,11 +467,15 @@ let pp_iprog ~debug pp_info pd msfsize asmOp fmt (gd, funcs) =
      (pp_globs pp_var) gd
      (pp_list "@ @ " (pp_fun_ ~debug ~pp_info pp_opn pp_var)) (List.rev funcs)
 
+(* let mktbl (funcs : List func) : ('ty list * 'ty list) Hf.t = *)
+(* extraer todas los tipos de las external functions, iterar sobre todos los cuerpos de funciones, ignorar los repetidos *)
 let pp_prog ~debug pd msfsize asmOp fmt ((gd, funcs):('info, 'asm) Prog.prog) =
   let pp_opn = pp_opn pd msfsize asmOp in
   let pp_var = pp_var ~debug in
+  (* let exttbl = mktbl funcs *)
   Format.fprintf fmt "@[<v>%a@ %a@]"
      (pp_globs pp_var) gd
+     (* TODO: pp_extern extbl *)
      (pp_list "@ @ " (pp_fun_ ~debug pp_opn pp_var)) (List.rev funcs)
 
 let pp_to_save ~debug fmt (x, ofs) =
